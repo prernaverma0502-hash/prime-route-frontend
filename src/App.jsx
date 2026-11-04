@@ -13,6 +13,7 @@ import ReportsPage from './pages/Reports/ReportsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import LoginPage from './pages/Auth/LoginPage';
 import ConfirmationModal from './components/common/ConfirmationModal';
+import { FleetProvider } from './context/FleetContext';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -82,25 +83,27 @@ export default function App() {
   };
 
   return (
-    <MainLayout
-      activeMenu={activeMenu}
-      settingsSubTab={settingsSubTab}
-      onNavigate={handleNavigate}
-      onLogout={() => setIsLogoutDialogOpen(true)}
-    >
-      {renderActiveModule()}
+    <FleetProvider>
+      <MainLayout
+        activeMenu={activeMenu}
+        settingsSubTab={settingsSubTab}
+        onNavigate={handleNavigate}
+        onLogout={() => setIsLogoutDialogOpen(true)}
+      >
+        {renderActiveModule()}
 
-      {/* Global Logout Confirmation */}
-      <ConfirmationModal
-        isOpen={isLogoutDialogOpen}
-        onClose={() => setIsLogoutDialogOpen(false)}
-        onConfirm={handleLogoutConfirm}
-        title="Sign Out of PrimeRoute"
-        message="Are you sure you want to end your current session? You will need to sign in again to access the fleet dashboard."
-        confirmText="Sign Out"
-        isDanger={false}
-      />
-    </MainLayout>
+        {/* Global Logout Confirmation */}
+        <ConfirmationModal
+          isOpen={isLogoutDialogOpen}
+          onClose={() => setIsLogoutDialogOpen(false)}
+          onConfirm={handleLogoutConfirm}
+          title="Sign Out of PrimeRoute"
+          message="Are you sure you want to end your current session? You will need to sign in again to access the fleet dashboard."
+          confirmText="Sign Out"
+          isDanger={false}
+        />
+      </MainLayout>
+    </FleetProvider>
   );
 }
 

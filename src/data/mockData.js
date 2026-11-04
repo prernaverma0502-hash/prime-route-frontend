@@ -511,7 +511,9 @@ export const initialRentals = [
     customerPhone: '+1 (555) 883-1920',
     customerEmail: 'fleet@apexlogistics.com',
     vehicle: 'Toyota Camry SE (PR-2024-TC)',
+    vehicleId: 'VEH-001',
     driver: 'Marcus Vance',
+    driverId: 'DRV-101',
     startDate: '2025-07-01',
     endDate: '2025-07-15',
     rentalType: 'Monthly Lease',
@@ -525,7 +527,41 @@ export const initialRentals = [
     paymentStatus: 'Paid',
     status: 'Active',
     paymentMethod: 'Corporate ACH',
-    notes: 'Premium commercial fleet lease agreement.'
+    notes: 'Premium commercial fleet lease agreement.',
+    // Pickup Information
+    pickupDateTime: '2025-07-01T09:00:00',
+    pickupOdometer: 24500,
+    pickupFuelLevel: 'Full (100%)',
+    pickupCondition: 'Pristine / No visible damage',
+    pickupRemarks: 'Handover inspection verified with Marcus Vance.',
+    // Rental Terms
+    weeklyRent: 487.5,
+    paymentDueDay: 'Every Monday',
+    securityDeposit: 500,
+    // Agreement Information
+    agreementStatus: 'Signed',
+    agreementData: {
+      owner: 'PrimeRoute',
+      renter: 'Marcus Vance',
+      license: 'DL-NY-9028148',
+      vehicle: '2023 Toyota Camry SE',
+      vin: '4T1B11HK5JU192831',
+      plate: 'PR-2024-TC',
+      weeklyRent: 487.5,
+      securityDeposit: 500,
+      paymentDueDay: 'Every Monday'
+    },
+    driverSignature: 'Marcus Vance',
+    representativeSignature: 'John Doe (Admin)',
+    signedAt: '2025-07-01T09:15:00',
+    agreementId: 'AGR-2024-089',
+    // Return Information
+    returnDateTime: null,
+    returnOdometer: null,
+    returnFuelLevel: null,
+    returnCondition: null,
+    returnRemarks: null,
+    returnStatus: 'Pending Return'
   },
   {
     id: 'RNT-2024-090',
@@ -533,7 +569,9 @@ export const initialRentals = [
     customerPhone: '+1 (555) 772-9918',
     customerEmail: 'dispatch@summittravel.com',
     vehicle: 'BMW 530i M Sport (PR-2024-BM)',
+    vehicleId: 'VEH-008',
     driver: 'Elena Rostova',
+    driverId: 'DRV-105',
     startDate: '2025-07-05',
     endDate: '2025-07-20',
     rentalType: 'Executive VIP',
@@ -547,7 +585,41 @@ export const initialRentals = [
     paymentStatus: 'Paid',
     status: 'Active',
     paymentMethod: 'Credit Card',
-    notes: 'Includes VIP driver concierge service.'
+    notes: 'Includes VIP driver concierge service.',
+    // Pickup Information
+    pickupDateTime: '2025-07-05T10:00:00',
+    pickupOdometer: 18900,
+    pickupFuelLevel: 'Full (100%)',
+    pickupCondition: 'Clean, executive detail verified',
+    pickupRemarks: 'Keys and transponder issued.',
+    // Rental Terms
+    weeklyRent: 675,
+    paymentDueDay: 'Every Friday',
+    securityDeposit: 1000,
+    // Agreement Information
+    agreementStatus: 'Signed',
+    agreementData: {
+      owner: 'PrimeRoute',
+      renter: 'Elena Rostova',
+      license: 'DL-FL-7719283',
+      vehicle: '2024 BMW 530i M Sport',
+      vin: 'WBA530I98BM102948',
+      plate: 'PR-2024-BM',
+      weeklyRent: 675,
+      securityDeposit: 1000,
+      paymentDueDay: 'Every Friday'
+    },
+    driverSignature: 'Elena Rostova',
+    representativeSignature: 'John Doe (Admin)',
+    signedAt: '2025-07-05T10:20:00',
+    agreementId: 'AGR-2024-090',
+    // Return Information
+    returnDateTime: null,
+    returnOdometer: null,
+    returnFuelLevel: null,
+    returnCondition: null,
+    returnRemarks: null,
+    returnStatus: 'Pending Return'
   },
   {
     id: 'RNT-2024-091',
@@ -555,7 +627,9 @@ export const initialRentals = [
     customerPhone: '+1 (555) 441-3329',
     customerEmail: 'admin@greenenergy.io',
     vehicle: 'Tesla Model 3 (PR-2024-TM)',
+    vehicleId: 'VEH-005',
     driver: 'Alexander Reed',
+    driverId: 'DRV-104',
     startDate: '2025-07-10',
     endDate: '2025-07-24',
     rentalType: 'Eco Fleet Rental',
@@ -569,7 +643,41 @@ export const initialRentals = [
     paymentStatus: 'Pending',
     status: 'Active',
     paymentMethod: 'Bank Wire',
-    notes: 'Supercharging allowance included.'
+    notes: 'Supercharging allowance included.',
+    // Pickup Information
+    pickupDateTime: '2025-07-10T11:00:00',
+    pickupOdometer: 12400,
+    pickupFuelLevel: '95% Battery SOC',
+    pickupCondition: 'Pristine / Supercharging cable present',
+    pickupRemarks: 'Eco fleet vehicle handed over.',
+    // Rental Terms
+    weeklyRent: 462.5,
+    paymentDueDay: 'Every Wednesday',
+    securityDeposit: 500,
+    // Agreement Information
+    agreementStatus: 'Awaiting Signature',
+    agreementData: {
+      owner: 'PrimeRoute',
+      renter: 'Alexander Reed',
+      license: 'DL-TX-5510928',
+      vehicle: '2024 Tesla Model 3 Long Range',
+      vin: '5YJ3E1EB8PF891023',
+      plate: 'PR-2024-TM',
+      weeklyRent: 462.5,
+      securityDeposit: 500,
+      paymentDueDay: 'Every Wednesday'
+    },
+    driverSignature: null,
+    representativeSignature: 'John Doe (Admin)',
+    signedAt: null,
+    agreementId: 'AGR-2024-091',
+    // Return Information
+    returnDateTime: null,
+    returnOdometer: null,
+    returnFuelLevel: null,
+    returnCondition: null,
+    returnRemarks: null,
+    returnStatus: 'Pending Return'
   },
   {
     id: 'RNT-2024-092',
@@ -577,7 +685,9 @@ export const initialRentals = [
     customerPhone: '+1 (555) 993-2281',
     customerEmail: 'operations@metrocouriers.com',
     vehicle: 'Honda Accord Sport (PR-2024-HA)',
+    vehicleId: 'VEH-002',
     driver: 'David Miller',
+    driverId: 'DRV-102',
     startDate: '2025-06-15',
     endDate: '2025-07-12',
     rentalType: 'Long Term Lease',
@@ -591,7 +701,41 @@ export const initialRentals = [
     paymentStatus: 'Paid',
     status: 'Completed',
     paymentMethod: 'Corporate Card',
-    notes: 'Vehicle returned in pristine condition.'
+    notes: 'Vehicle returned in pristine condition.',
+    // Pickup Information
+    pickupDateTime: '2025-06-15T08:30:00',
+    pickupOdometer: 28100,
+    pickupFuelLevel: 'Full (100%)',
+    pickupCondition: 'Clean / Good condition',
+    pickupRemarks: 'Commercial delivery lease handover.',
+    // Rental Terms
+    weeklyRent: 525,
+    paymentDueDay: 'Every Monday',
+    securityDeposit: 600,
+    // Agreement Information
+    agreementStatus: 'Signed',
+    agreementData: {
+      owner: 'PrimeRoute',
+      renter: 'David Miller',
+      license: 'DL-CA-4491029',
+      vehicle: '2023 Honda Accord Sport',
+      vin: '1HGCR2F83HA029341',
+      plate: 'PR-2024-HA',
+      weeklyRent: 525,
+      securityDeposit: 600,
+      paymentDueDay: 'Every Monday'
+    },
+    driverSignature: 'David Miller',
+    representativeSignature: 'John Doe (Admin)',
+    signedAt: '2025-06-15T08:45:00',
+    agreementId: 'AGR-2024-092',
+    // Return Information
+    returnDateTime: '2025-07-12T16:00:00',
+    returnOdometer: 31200,
+    returnFuelLevel: 'Full (100%)',
+    returnCondition: 'Pristine / Normal wear and tear only',
+    returnRemarks: 'Vehicle returned with full tank, all keys returned.',
+    returnStatus: 'Returned & Settled'
   },
   {
     id: 'RNT-2024-093',
@@ -599,7 +743,9 @@ export const initialRentals = [
     customerPhone: '+1 (555) 231-9988',
     customerEmail: 'production@vanguardmedia.com',
     vehicle: 'Ford F-150 Lariat (PR-2024-FF)',
+    vehicleId: 'VEH-007',
     driver: 'Standby Driver',
+    driverId: 'DRV-103',
     startDate: '2025-07-22',
     endDate: '2025-07-29',
     rentalType: 'Commercial Weekly',
@@ -613,7 +759,31 @@ export const initialRentals = [
     paymentStatus: 'Pending',
     status: 'Upcoming',
     paymentMethod: 'Credit Card',
-    notes: 'Tow package requested for filming gear.'
+    notes: 'Tow package requested for filming gear.',
+    // Pickup Information
+    pickupDateTime: null,
+    pickupOdometer: null,
+    pickupFuelLevel: null,
+    pickupCondition: null,
+    pickupRemarks: null,
+    // Rental Terms
+    weeklyRent: 1100,
+    paymentDueDay: 'Every Tuesday',
+    securityDeposit: 500,
+    // Agreement Information
+    agreementStatus: 'Draft',
+    agreementData: null,
+    driverSignature: null,
+    representativeSignature: null,
+    signedAt: null,
+    agreementId: 'AGR-2024-093',
+    // Return Information
+    returnDateTime: null,
+    returnOdometer: null,
+    returnFuelLevel: null,
+    returnCondition: null,
+    returnRemarks: null,
+    returnStatus: 'Scheduled'
   }
 ];
 
@@ -903,8 +1073,10 @@ export const initialInspections = [
     type: 'Check-out (Pickup)',
     contractId: 'RNT-2025-001',
     vehicle: 'Toyota Camry SE',
+    vehicleId: 'VEH-001',
     plate: 'PR-2024-TC',
     driver: 'Sarah Jenkins',
+    driverId: 'DRV-103',
     date: '2025-07-01',
     time: '09:30 AM',
     odometer: 14200,
@@ -930,8 +1102,10 @@ export const initialInspections = [
     type: 'Check-in (Return)',
     contractId: 'RNT-2024-098',
     vehicle: 'Honda Accord Sport',
+    vehicleId: 'VEH-002',
     plate: 'PR-2024-HA',
     driver: 'David Miller',
+    driverId: 'DRV-102',
     date: '2025-07-08',
     time: '04:15 PM',
     odometer: 28450,
@@ -956,8 +1130,10 @@ export const initialInspections = [
     type: 'Check-out (Pickup)',
     contractId: 'RNT-2025-002',
     vehicle: 'Tesla Model 3',
+    vehicleId: 'VEH-005',
     plate: 'PR-2024-TM',
     driver: 'Michael Chang',
+    driverId: 'DRV-106',
     date: '2025-07-10',
     time: '11:00 AM',
     odometer: 19800,

@@ -25,12 +25,12 @@ import InspectionModal from './InspectionModal';
 import InspectionDetailsModal from './InspectionDetailsModal';
 import AccidentModal from './AccidentModal';
 import { initialInspections, initialAccidents } from '../../data/mockData';
+import { useFleet } from '../../context/FleetContext';
 import { exportToCsv } from '../../utils/exportCsv';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export default function InspectionsPage() {
-  const [inspections, setInspections] = useState(initialInspections);
-  const [accidents, setAccidents] = useState(initialAccidents);
+  const { inspections, setInspections, accidents, setAccidents } = useFleet();
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'pickup' | 'return' | 'damaged' | 'accidents'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');

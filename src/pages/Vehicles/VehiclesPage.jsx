@@ -22,11 +22,12 @@ import ConfirmationModal from '../../components/common/ConfirmationModal';
 import VehicleModal from './VehicleModal';
 import VehicleDetailsModal from './VehicleDetailsModal';
 import { initialVehicles } from '../../data/mockData';
+import { useFleet } from '../../context/FleetContext';
 import { exportToCsv } from '../../utils/exportCsv';
 import { formatCurrency } from '../../utils/formatters';
 
 export default function VehiclesPage() {
-  const [vehicles, setVehicles] = useState(initialVehicles);
+  const { vehicles, setVehicles } = useFleet();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');

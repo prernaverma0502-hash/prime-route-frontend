@@ -81,11 +81,27 @@
 @media print {
   body {
     background: white !important;
+    color: black !important;
   }
-  .no-print {
+  .no-print, header, aside, nav, button {
     display: none !important;
   }
   .print-only {
     display: block !important;
+  }
+  .printable-agreement {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
   }
 }

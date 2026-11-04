@@ -10,7 +10,12 @@ import {
   Clock,
   Calendar,
   XCircle,
-  FileText
+  FileText,
+  KeyRound,
+  PenLine,
+  RotateCcw,
+  ClipboardCheck,
+  CarFront
 } from 'lucide-react';
 import StatCard from '../../components/common/StatCard';
 import SearchBar from '../../components/common/SearchBar';
@@ -21,20 +26,28 @@ import EmptyState from '../../components/common/EmptyState';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import RentalModal from './RentalModal';
 import RentalDetailsModal from './RentalDetailsModal';
+import VehiclePickupModal from './VehiclePickupModal';
+import VehicleReturnModal from './VehicleReturnModal';
+import RentalAgreementModal from '../../components/agreements/RentalAgreementModal';
 import { initialRentals } from '../../data/mockData';
+import { useFleet } from '../../context/FleetContext';
 import { exportToCsv } from '../../utils/exportCsv';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export default function RentalsPage() {
-  const [rentals, setRentals] = useState(initialRentals);
+  const { rentals, setRentals } = useFleet();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isPickupModalOpen, setIsPickupModalOpen] = useState(false);
   const [editingRental, setEditingRental] = useState(null);
   const [viewingRental, setViewingRental] = useState(null);
+  const [signingRental, setSigningRental] = useState(null);
+  const [returningRental, setReturningRental] = useState(null);
+  const [viewingReturnRental, setViewingReturnRental] = useState(null);
   const [deletingRental, setDeletingRental] = useState(null);
 
   const stats = useMemo(() => {
@@ -118,16 +131,22 @@ export default function RentalsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 duration-150"
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 duration-150 cursor-pointer"
           >
             <Download className="w-4 h-4 text-slate-500" /> Export CSV
+          </button>
+          <button
+            onClick={() => setIsPickupModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#071D49] hover:bg-[#0D2D6C] text-white text-xs font-bold shadow-md shadow-slate-900/10 transition-all active:scale-95 duration-150 cursor-pointer"
+          >
+            <KeyRound className="w-4 h-4 text-emerald-400" /> Vehicle Pickup
           </button>
           <button
             onClick={() => {
               setEditingRental(null);
               setIsAddModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#075EE8] hover:bg-[#0650C7] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all active:scale-95 duration-150"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#075EE8] hover:bg-[#0650C7] text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all active:scale-95 duration-150 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Create Rental
           </button>
@@ -232,6 +251,25 @@ export default function RentalsPage() {
         </div>
       </div>
 
+      {/* Rental Agreements Section Heading */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4 text-[#075EE8]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-[#0A1E42] tracking-tight">Rental Agreements</h2>
+            <p className="text-xs text-slate-500">
+              Active commercial lease contracts, legal agreements, and fleet dispatch records
+            </p>
+          </div>
+        </div>
+
+        <div className="text-xs font-semibold text-slate-500 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200/80 shadow-xs self-start sm:self-auto">
+          Total Contracts: <span className="font-bold text-[#075EE8]">{filteredRentals.length}</span>
+        </div>
+      </div>
+
       {/* Rentals Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] overflow-hidden">
         {paginatedRentals.length === 0 ? (
@@ -256,6 +294,7 @@ export default function RentalsPage() {
                   <th className="py-3.5 px-4">Amount</th>
                   <th className="py-3.5 px-4">Payment</th>
                   <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Agreement</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -298,12 +337,46 @@ export default function RentalsPage() {
                       <StatusBadge status={rental.status} />
                     </td>
 
+                    <td className="py-3.5 px-4">
+                      <button
+                        onClick={() => setSigningRental(rental)}
+                        title="Open Rental Agreement"
+                        className="p-1.5 text-slate-600 hover:text-[#075EE8] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center active:scale-95"
+                        aria-label="Open Rental Agreement"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </button>
+                    </td>
+
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {/* Vehicle Return Action for Active Rentals */}
+                        {rental.status === 'Active' && (
+                          <button
+                            onClick={() => setReturningRental(rental)}
+                            title="Vehicle Return"
+                            className="p-1.5 text-blue-600 hover:text-white hover:bg-[#075EE8] rounded-lg transition-all cursor-pointer shadow-2xs"
+                            aria-label="Vehicle Return"
+                          >
+                            <CarFront className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {/* View Return Audit for Completed Rentals */}
+                        {rental.status === 'Completed' && (
+                          <button
+                            onClick={() => setViewingReturnRental(rental)}
+                            title="View Vehicle Return Audit"
+                            className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <ClipboardCheck className="w-4 h-4" />
+                          </button>
+                        )}
+
                         <button
                           onClick={() => setViewingRental(rental)}
                           title="View Agreement & Invoice"
-                          className="p-1.5 text-slate-500 hover:text-[#075EE8] hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-[#075EE8] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -352,6 +425,12 @@ export default function RentalsPage() {
         rental={editingRental}
       />
 
+      <VehiclePickupModal
+        isOpen={isPickupModalOpen}
+        onClose={() => setIsPickupModalOpen(false)}
+        onSave={handleSaveRental}
+      />
+
       <RentalDetailsModal
         isOpen={!!viewingRental}
         onClose={() => setViewingRental(null)}
@@ -361,6 +440,40 @@ export default function RentalsPage() {
           setIsAddModalOpen(true);
         }}
         onDelete={(r) => setDeletingRental(r)}
+        onViewAgreement={(r) => {
+          setViewingRental(null);
+          setSigningRental(r);
+        }}
+        onProcessReturn={(r) => {
+          setViewingRental(null);
+          setReturningRental(r);
+        }}
+        onViewReturn={(r) => {
+          setViewingRental(null);
+          setViewingReturnRental(r);
+        }}
+      />
+
+      <VehicleReturnModal
+        isOpen={!!returningRental}
+        onClose={() => setReturningRental(null)}
+        rental={returningRental}
+      />
+
+      <VehicleReturnModal
+        isOpen={!!viewingReturnRental}
+        onClose={() => setViewingReturnRental(null)}
+        rental={viewingReturnRental}
+        isViewOnly
+      />
+
+      <RentalAgreementModal
+        isOpen={!!signingRental}
+        onClose={() => setSigningRental(null)}
+        rental={signingRental}
+        onAgreementSigned={(updated) => {
+          setSigningRental(updated);
+        }}
       />
 
       <ConfirmationModal

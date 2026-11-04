@@ -22,11 +22,12 @@ import ConfirmationModal from '../../components/common/ConfirmationModal';
 import DriverModal from './DriverModal';
 import DriverDetailsModal from './DriverDetailsModal';
 import { initialDrivers } from '../../data/mockData';
+import { useFleet } from '../../context/FleetContext';
 import { exportToCsv } from '../../utils/exportCsv';
 import { formatCurrency } from '../../utils/formatters';
 
 export default function DriversPage() {
-  const [drivers, setDrivers] = useState(initialDrivers);
+  const { drivers, setDrivers } = useFleet();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
