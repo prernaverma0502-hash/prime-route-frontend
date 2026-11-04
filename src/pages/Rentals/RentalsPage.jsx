@@ -128,7 +128,7 @@ export default function RentalsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleExport}
             className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all active:scale-95 duration-150 cursor-pointer"
@@ -253,7 +253,7 @@ export default function RentalsPage() {
 
       {/* Rental Agreements Section Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0">
             <FileText className="w-4 h-4 text-[#075EE8]" />
           </div>
@@ -284,7 +284,7 @@ export default function RentalsPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[880px]">
               <thead>
                 <tr className="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4">Rental ID</th>
@@ -294,7 +294,7 @@ export default function RentalsPage() {
                   <th className="py-3.5 px-4">Amount</th>
                   <th className="py-3.5 px-4">Payment</th>
                   <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4">Agreement</th>
+                  <th className="py-3.5 px-4 text-center">Agreement</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -337,7 +337,7 @@ export default function RentalsPage() {
                       <StatusBadge status={rental.status} />
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 text-center">
                       <button
                         onClick={() => setSigningRental(rental)}
                         title="Open Rental Agreement"

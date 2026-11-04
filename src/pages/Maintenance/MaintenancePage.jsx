@@ -248,7 +248,7 @@ export default function MaintenancePage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[840px]">
               <thead>
                 <tr className="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4">Vehicle</th>
@@ -309,7 +309,7 @@ export default function MaintenancePage() {
                       {formatCurrency(item.cost)}
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <StatusBadge status={item.status} />
                     </td>
 

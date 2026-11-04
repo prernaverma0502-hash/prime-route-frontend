@@ -26,7 +26,7 @@ export default function VehiclePickupModal({
   onClose,
   onSave
 }) {
-  const { vehicles, drivers, rentals, updateVehicleStatus, updateDriverVehicle, saveRental } = useFleet();
+  const { vehicles, drivers, rentals, updateVehicleStatus, updateDriverVehicle, saveRental, addInspection } = useFleet();
 
   // Filter available vehicles only
   const availableVehicles = useMemo(() => {
@@ -268,19 +268,27 @@ export default function VehiclePickupModal({
       agreementStatus: 'Awaiting Signature',
       agreementData: {
         owner: 'PrimeRoute Fleet Operations',
+        representativeName: 'John Doe (Administrator)',
         renter: selectedDriver.name,
+        driverName: selectedDriver.name,
         license: selectedDriver.license,
+        driverLicense: selectedDriver.license,
         phone: selectedDriver.phone,
+        driverPhone: selectedDriver.phone,
         email: selectedDriver.email,
+        driverEmail: selectedDriver.email,
         vehicleYear: selectedVehicle.year,
         vehicleMake: selectedVehicle.make,
         vehicleModel: selectedVehicle.model,
         vehicleColor: selectedVehicle.color,
         vin: selectedVehicle.vin,
+        vehicleVin: selectedVehicle.vin,
         plate: selectedVehicle.plate,
+        vehiclePlate: selectedVehicle.plate,
         pickupOdometer: Number(formData.pickupOdometer),
         pickupFuelLevel: formData.pickupFuelLevel,
         startDate: formData.startDate,
+        endDate: formData.endDate,
         weeklyRent: weeklyRate,
         paymentDueDay: formData.paymentDueDay,
         securityDeposit: depositAmount
@@ -308,7 +316,37 @@ export default function VehiclePickupModal({
       `${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.plate})`
     );
 
-    // 3. Save new rental into shared state
+    // 3. Log Check-out (Pickup) Handover Inspection
+    if (addInspection) {
+      const inspectionId = `INS-${Date.now()}`;
+      addInspection({
+        id: inspectionId,
+        inspectionNumber: `INSP-${Math.floor(1000 + Math.random() * 9000)}`,
+        type: 'Check-out (Pickup)',
+        contractId: newRentalId,
+        vehicle: `${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.plate})`,
+        vehicleId: selectedVehicle.id,
+        plate: selectedVehicle.plate,
+        driver: selectedDriver.name,
+        driverId: selectedDriver.id,
+        date: formData.startDate,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        odometer: Number(formData.pickupOdometer),
+        fuelLevel: formData.pickupFuelLevel,
+        exteriorCondition: formData.pickupCondition,
+        interiorCondition: 'Clean & Sanitized',
+        tiresCondition: 'Good (Verified)',
+        windshieldStatus: 'Clear / Intact',
+        spareTirePresent: true,
+        inspector: 'John Doe (Admin)',
+        status: 'Passed',
+        notes: formData.pickupRemarks,
+        driverSignature: selectedDriver.name,
+        photos: []
+      });
+    }
+
+    // 4. Save new rental into shared state
     if (onSave) {
       onSave(newRentalRecord);
     } else {
@@ -395,6 +433,7 @@ export default function VehiclePickupModal({
                 <img
                   src={selectedDriver.avatar}
                   alt={selectedDriver.name}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-12 h-12 rounded-xl object-cover ring-2 ring-blue-100 shrink-0"
                 />
                 <div className="min-w-0 flex-1 text-xs space-y-0.5">
@@ -475,6 +514,7 @@ export default function VehiclePickupModal({
                 <img
                   src={selectedVehicle.image}
                   alt={selectedVehicle.name}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-16 h-12 rounded-xl object-cover ring-2 ring-blue-100 shrink-0"
                 />
                 <div className="min-w-0 flex-1 text-xs space-y-0.5">
@@ -678,7 +718,7 @@ export default function VehiclePickupModal({
         </div>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
           <button
             type="button"
             onClick={onClose}

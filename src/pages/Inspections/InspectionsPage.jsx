@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   ClipboardCheck,
   ShieldAlert,
@@ -12,7 +12,8 @@ import {
   Gauge,
   Fuel,
   Car,
-  DollarSign
+  DollarSign,
+  Filter
 } from 'lucide-react';
 import StatCard from '../../components/common/StatCard';
 import SearchBar from '../../components/common/SearchBar';
@@ -33,9 +34,60 @@ export default function InspectionsPage() {
   const { inspections, setInspections, accidents, setAccidents } = useFleet();
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'pickup' | 'return' | 'damaged' | 'accidents'
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
+
+  // Multi-Filter State
+  const [typeFilter, setTypeFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [vehicleFilter, setVehicleFilter] = useState('All');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  // Close filter popover on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isFilterOpen]);
+
+  // Extract unique vehicles available in existing inspections
+  const availableVehicles = useMemo(() => {
+    const list = inspections.map((i) => i.vehicle).filter(Boolean);
+    return ['All', ...Array.from(new Set(list))];
+  }, [inspections]);
+
+  // Active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (typeFilter !== 'All') count++;
+    if (statusFilter !== 'All') count++;
+    if (vehicleFilter !== 'All') count++;
+    if (startDate) count++;
+    if (endDate) count++;
+    return count;
+  }, [typeFilter, statusFilter, vehicleFilter, startDate, endDate]);
+
+  const handleClearFilters = () => {
+    setTypeFilter('All');
+    setStatusFilter('All');
+    setVehicleFilter('All');
+    setStartDate('');
+    setEndDate('');
+    setCurrentPage(1);
+  };
 
   // Modals state
   const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
@@ -73,20 +125,60 @@ export default function InspectionsPage() {
         i.driver.toLowerCase().includes(q) ||
         i.inspector.toLowerCase().includes(q);
 
-      const matchesStatus = statusFilter === 'All' || i.status === statusFilter;
+      // Status Filter matching: All, Passed, Issues Found, Action Required
+      let matchesStatus = true;
+      if (statusFilter !== 'All') {
+        if (statusFilter === 'Passed') {
+          matchesStatus = i.status === 'Passed';
+        } else if (statusFilter === 'Issues Found') {
+          matchesStatus = i.status === 'Damage Detected' || i.status === 'Issues Found';
+        } else if (statusFilter === 'Action Required') {
+          matchesStatus = i.status === 'Under Review' || i.status === 'Action Required';
+        } else {
+          matchesStatus = i.status === statusFilter;
+        }
+      }
 
+      // Type Filter matching: All, Pickup (Check-out), Return (Check-in)
+      let matchesType = true;
+      if (typeFilter !== 'All') {
+        if (typeFilter.includes('Pickup')) {
+          matchesType = i.type.toLowerCase().includes('pickup');
+        } else if (typeFilter.includes('Return')) {
+          matchesType = i.type.toLowerCase().includes('return');
+        } else {
+          matchesType = i.type === typeFilter;
+        }
+      }
+
+      // Vehicle Filter matching
+      let matchesVehicle = true;
+      if (vehicleFilter !== 'All') {
+        matchesVehicle = i.vehicle === vehicleFilter || i.vehicle.toLowerCase().includes(vehicleFilter.toLowerCase());
+      }
+
+      // Date Range matching
+      let matchesDate = true;
+      if (startDate) {
+        matchesDate = matchesDate && i.date >= startDate;
+      }
+      if (endDate) {
+        matchesDate = matchesDate && i.date <= endDate;
+      }
+
+      // Quick Tab matching
+      let matchesTab = true;
       if (activeTab === 'pickup') {
-        return matchesSearch && matchesStatus && i.type.includes('Pickup');
+        matchesTab = i.type.toLowerCase().includes('pickup');
+      } else if (activeTab === 'return') {
+        matchesTab = i.type.toLowerCase().includes('return');
+      } else if (activeTab === 'damaged') {
+        matchesTab = i.status === 'Damage Detected' || i.status === 'Under Review' || i.status === 'Issues Found';
       }
-      if (activeTab === 'return') {
-        return matchesSearch && matchesStatus && i.type.includes('Return');
-      }
-      if (activeTab === 'damaged') {
-        return matchesSearch && (i.status === 'Damage Detected' || i.status === 'Under Review');
-      }
-      return matchesSearch && matchesStatus;
+
+      return matchesSearch && matchesStatus && matchesType && matchesVehicle && matchesDate && matchesTab;
     });
-  }, [inspections, searchQuery, statusFilter, activeTab]);
+  }, [inspections, searchQuery, statusFilter, typeFilter, vehicleFilter, startDate, endDate, activeTab]);
 
   // Filtered Accidents
   const filteredAccidents = useMemo(() => {
@@ -101,9 +193,14 @@ export default function InspectionsPage() {
         a.claimNumber.toLowerCase().includes(q);
 
       const matchesStatus = statusFilter === 'All' || a.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesVehicle = vehicleFilter === 'All' || a.vehicle === vehicleFilter || a.vehicle.toLowerCase().includes(vehicleFilter.toLowerCase());
+      let matchesDate = true;
+      if (startDate) matchesDate = matchesDate && (a.incidentDate || a.date) >= startDate;
+      if (endDate) matchesDate = matchesDate && (a.incidentDate || a.date) <= endDate;
+
+      return matchesSearch && matchesStatus && matchesVehicle && matchesDate;
     });
-  }, [accidents, searchQuery, statusFilter]);
+  }, [accidents, searchQuery, statusFilter, vehicleFilter, startDate, endDate]);
 
   // Pagination calculations
   const currentList = activeTab === 'accidents' ? filteredAccidents : filteredInspections;
@@ -157,8 +254,8 @@ export default function InspectionsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div className="max-w-2xl">
           <h1 className="text-xl sm:text-2xl font-extrabold text-[#0A1E42] tracking-tight">
             Inspections &amp; Damage Management
           </h1>
@@ -167,36 +264,42 @@ export default function InspectionsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={handleExport}
-            className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-sm transition-all"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            Export Data
-          </button>
+        <div className="flex flex-col items-start md:items-end gap-2.5 shrink-0 self-start md:self-auto">
+          {/* Top Row: Export Data and Report Accident / Claim */}
+          <div className="flex items-center gap-2.5 flex-wrap justify-end">
+            <button
+              onClick={handleExport}
+              className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              Export Data
+            </button>
 
-          <button
-            onClick={() => {
-              setEditingAccident(null);
-              setIsAccidentModalOpen(true);
-            }}
-            className="px-3.5 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-            + Report Accident / Claim
-          </button>
+            <button
+              onClick={() => {
+                setEditingAccident(null);
+                setIsAccidentModalOpen(true);
+              }}
+              className="px-3.5 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+              + Report Accident / Claim
+            </button>
+          </div>
 
-          <button
-            onClick={() => {
-              setEditingInspection(null);
-              setIsInspectionModalOpen(true);
-            }}
-            className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all active:scale-97"
-          >
-            <Plus className="w-4 h-4" />
-            New Inspection
-          </button>
+          {/* Second Row: New Inspection aligned to the right side directly below the top row */}
+          <div className="flex items-center justify-end">
+            <button
+              onClick={() => {
+                setEditingInspection(null);
+                setIsInspectionModalOpen(true);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all active:scale-97 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              New Inspection
+            </button>
+          </div>
         </div>
       </div>
 
@@ -279,19 +382,164 @@ export default function InspectionsPage() {
             />
           </div>
 
-          <FilterDropdown
-            label="Status"
-            value={statusFilter}
-            onChange={(val) => {
-              setStatusFilter(val);
-              setCurrentPage(1);
-            }}
-            options={
-              activeTab === 'accidents'
-                ? ['All', 'Open', 'Under Review', 'Approved', 'Settled']
-                : ['All', 'Passed', 'Damage Detected', 'Under Review']
-            }
-          />
+          {/* Inspection Filter Dropdown Popover */}
+          <div className="relative" ref={filterRef}>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen((prev) => !prev)}
+              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer shadow-sm active:scale-95 ${
+                activeFilterCount > 0 || isFilterOpen
+                  ? 'bg-blue-50 border-[#075EE8] text-[#075EE8] ring-2 ring-[#075EE8]/20'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+              aria-label="Filter inspections"
+              title="Filter inspections"
+            >
+              <Filter className="w-3.5 h-3.5 text-[#075EE8]" />
+              <span>Filter</span>
+              {activeFilterCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-[#075EE8] text-white text-[10px] font-black flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Filter Dropdown Popover Menu */}
+            {isFilterOpen && (
+              <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 animate-scale-up space-y-3.5">
+                {/* Popover Header */}
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-[#075EE8]" />
+                    <h4 className="text-xs font-bold text-[#0A1E42] uppercase tracking-wider">
+                      Inspection Filters
+                    </h4>
+                  </div>
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter 1: Inspection Type */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                    Inspection Type
+                  </label>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
+                  >
+                    <option value="All">All Types</option>
+                    <option value="Pickup (Check-out)">Pickup (Check-out)</option>
+                    <option value="Return (Check-in)">Return (Check-in)</option>
+                  </select>
+                </div>
+
+                {/* Filter 2: Inspection Status */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                    Inspection Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Passed">Passed</option>
+                    <option value="Issues Found">Issues Found</option>
+                    <option value="Action Required">Action Required</option>
+                  </select>
+                </div>
+
+                {/* Filter 3: Vehicle */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                    Vehicle
+                  </label>
+                  <select
+                    value={vehicleFilter}
+                    onChange={(e) => {
+                      setVehicleFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
+                  >
+                    {availableVehicles.map((veh) => (
+                      <option key={veh} value={veh}>
+                        {veh === 'All' ? 'All Vehicles' : veh}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter 4: Date Range */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
+                    Date Range
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block mb-0.5">Start Date</span>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => {
+                          setStartDate(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8]"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block mb-0.5">End Date</span>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => {
+                          setEndDate(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Popover Footer */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
+                  >
+                    Clear Filters
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsFilterOpen(false)}
+                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#075EE8] hover:bg-[#0650C7] rounded-lg transition-all shadow-xs cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -303,10 +551,10 @@ export default function InspectionsPage() {
             <EmptyState
               title="No inspection records found"
               description="No vehicle inspections match your current filter parameters."
-              actionText="Reset Filter"
+              actionText="Reset All Filters"
               onAction={() => {
                 setSearchQuery('');
-                setStatusFilter('All');
+                handleClearFilters();
                 setActiveTab('all');
               }}
             />
@@ -436,10 +684,10 @@ export default function InspectionsPage() {
             <EmptyState
               title="No accident records found"
               description="No incident or insurance claim records match your parameters."
-              actionText="Reset Filter"
+              actionText="Reset All Filters"
               onAction={() => {
                 setSearchQuery('');
-                setStatusFilter('All');
+                handleClearFilters();
               }}
             />
           ) : (

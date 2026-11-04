@@ -40,6 +40,7 @@ export default function VehicleDetailsModal({
             <img
               src={vehicle.image}
               alt={vehicle.name}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
               className="w-36 h-24 object-cover rounded-xl border-2 border-white/20 shadow-lg"
             />
             <div className="text-center sm:text-left">

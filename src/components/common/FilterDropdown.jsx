@@ -19,11 +19,15 @@ export default function FilterDropdown({
           icon ? 'pl-8' : 'pl-3'
         } pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer shadow-sm hover:border-slate-300 transition-all`}
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
+        {options.map((opt, idx) => {
+          const val = typeof opt === 'object' && opt !== null ? opt.value : opt;
+          const lbl = typeof opt === 'object' && opt !== null ? opt.label : opt;
+          return (
+            <option key={val !== undefined ? val : idx} value={val}>
+              {lbl}
+            </option>
+          );
+        })}
       </select>
       <div className="absolute right-2.5 pointer-events-none text-slate-400 text-xs">
         ▼

@@ -41,9 +41,35 @@ export default function RentalAgreementModal({
   const baseAgreementData = useMemo(() => {
     if (!rental) return null;
 
-    // If agreementData snapshot already exists, use it to ensure immutability
+    // If agreementData snapshot already exists, normalize and use it to ensure immutability
     if (rental.agreementData) {
-      return rental.agreementData;
+      return {
+        ...rental.agreementData,
+        agreementId: rental.agreementData.agreementId || rental.agreementId || `AGR-${rental.id}`,
+        owner: rental.agreementData.owner || 'PrimeRoute Fleet Operations',
+        representativeName: rental.agreementData.representativeName || 'John Doe (Administrator)',
+        driverName: rental.agreementData.driverName || rental.agreementData.renter || resolvedDriver?.name || rental.driver || rental.customer || 'Driver Name',
+        renter: rental.agreementData.renter || rental.agreementData.driverName || resolvedDriver?.name || rental.driver || 'Driver Name',
+        driverLicense: rental.agreementData.driverLicense || rental.agreementData.license || resolvedDriver?.license || 'DL-PENDING',
+        license: rental.agreementData.license || rental.agreementData.driverLicense || resolvedDriver?.license || 'DL-PENDING',
+        driverPhone: rental.agreementData.driverPhone || rental.agreementData.phone || resolvedDriver?.phone || rental.customerPhone || '',
+        driverEmail: rental.agreementData.driverEmail || rental.agreementData.email || resolvedDriver?.email || rental.customerEmail || '',
+        vehicleYear: rental.agreementData.vehicleYear || resolvedVehicle?.year || 2024,
+        vehicleMake: rental.agreementData.vehicleMake || resolvedVehicle?.make || 'Toyota',
+        vehicleModel: rental.agreementData.vehicleModel || resolvedVehicle?.model || 'Camry',
+        vehicleColor: rental.agreementData.vehicleColor || resolvedVehicle?.color || 'Black',
+        vehicleVin: rental.agreementData.vehicleVin || rental.agreementData.vin || resolvedVehicle?.vin || 'VIN-PENDING-CHECK',
+        vin: rental.agreementData.vin || rental.agreementData.vehicleVin || resolvedVehicle?.vin || 'VIN-PENDING-CHECK',
+        vehiclePlate: rental.agreementData.vehiclePlate || rental.agreementData.plate || resolvedVehicle?.plate || 'PR-2024-TC',
+        plate: rental.agreementData.plate || rental.agreementData.vehiclePlate || resolvedVehicle?.plate || 'PR-2024-TC',
+        pickupOdometer: rental.agreementData.pickupOdometer ?? rental.pickupOdometer ?? (resolvedVehicle?.mileage || 24500),
+        pickupFuelLevel: rental.agreementData.pickupFuelLevel || rental.pickupFuelLevel || 'Full (100%)',
+        startDate: rental.agreementData.startDate || rental.startDate,
+        endDate: rental.agreementData.endDate || rental.endDate,
+        weeklyRent: rental.agreementData.weeklyRent || rental.weeklyRent || Math.round((rental.amount || 1950) / 4),
+        paymentDueDay: rental.agreementData.paymentDueDay || rental.paymentDueDay || 'Every Monday',
+        securityDeposit: rental.agreementData.securityDeposit || rental.securityDeposit || rental.deposit || 300,
+      };
     }
 
     // Otherwise construct fresh data snapshot
@@ -243,7 +269,7 @@ Driver: Digitally Signed (${data.driverName})
             </div>
           </div>
 
-          <div className="flex items-center gap-2 no-print shrink-0">
+          <div className="flex flex-wrap items-center gap-2 no-print shrink-0">
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-xs cursor-pointer"
@@ -302,7 +328,7 @@ Driver: Digitally Signed (${data.driverName})
               />
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-200">
               <span className="text-[11px] text-slate-500">
                 Signatures will be permanently stamped into the legal document snapshot below.
               </span>
@@ -337,7 +363,7 @@ Driver: Digitally Signed (${data.driverName})
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 no-print">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-3 border-t border-slate-100 no-print">
           <div className="text-xs text-slate-500">
             Agreement ID: <span className="font-mono font-bold text-[#0A1E42]">{baseAgreementData?.agreementId}</span>
           </div>

@@ -280,6 +280,7 @@ export default function VehiclesPage() {
                         <img
                           src={car.image}
                           alt={car.name}
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           className="w-12 h-9 object-cover rounded-lg border border-slate-100 shrink-0"
                         />
                         <div>

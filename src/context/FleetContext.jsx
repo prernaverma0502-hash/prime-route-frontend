@@ -16,15 +16,16 @@ export function FleetProvider({ children }) {
   const [inspections, setInspections] = useState(initialInspections);
   const [accidents, setAccidents] = useState(initialAccidents);
 
-  // Helper: Update vehicle status (e.g. 'Available', 'Rented', 'Maintenance') and optionally assign/unassign driver
-  const updateVehicleStatus = useCallback((vehicleIdOrPlate, newStatus, driverName = null) => {
+  // Helper: Update vehicle status (e.g. 'Available', 'Rented', 'Maintenance') and optionally assign/unassign driver & update mileage
+  const updateVehicleStatus = useCallback((vehicleIdOrPlate, newStatus, driverName = null, newMileage = null) => {
     setVehicles((prev) =>
       prev.map((v) => {
         if (v.id === vehicleIdOrPlate || v.plate === vehicleIdOrPlate || v.name === vehicleIdOrPlate) {
           return {
             ...v,
             status: newStatus,
-            ...(driverName !== null ? { driver: driverName } : {})
+            ...(driverName !== null ? { driver: driverName } : {}),
+            ...(newMileage !== null && !isNaN(Number(newMileage)) ? { mileage: `${Number(newMileage).toLocaleString()} mi` } : {})
           };
         }
         return v;

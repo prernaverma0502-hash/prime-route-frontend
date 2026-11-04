@@ -6,6 +6,7 @@ import {
   Calendar,
   MapPin,
   Car,
+  CarFront,
   User,
   CreditCard,
   CheckCircle,
@@ -179,11 +180,11 @@ export default function RentalDetailsModal({
         )}
 
         {/* Modal Actions Footer */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between no-print">
+        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
           <div className="text-xs text-slate-500">
             Agreement ID: <span className="font-mono font-bold text-[#0A1E42]">{rental.id}</span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             {onViewAgreement && (
               <button
                 onClick={() => onViewAgreement(rental)}
@@ -199,7 +200,7 @@ export default function RentalDetailsModal({
                 onClick={() => onProcessReturn(rental)}
                 className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm cursor-pointer"
               >
-                <Car className="w-4 h-4" />
+                <CarFront className="w-4 h-4" />
                 Vehicle Return
               </button>
             )}

@@ -237,7 +237,7 @@ export default function RentalModal({
           <h4 className="text-xs font-bold text-[#0A1E42] mb-3 uppercase tracking-wider">
             Financial Terms &amp; Calculation
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             <FormInput
               label="Base Rate ($)"
               name="amount"

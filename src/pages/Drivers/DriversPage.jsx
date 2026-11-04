@@ -259,6 +259,7 @@ export default function DriversPage() {
                         <img
                           src={driver.avatar}
                           alt={driver.name}
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 shrink-0"
                         />
                         <div>

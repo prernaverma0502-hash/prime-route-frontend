@@ -7,9 +7,9 @@ export default function StatusBadge({ status, className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all duration-200 ${bg} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap w-fit shrink-0 transition-all duration-200 ${bg} ${className}`}
     >
-      <span className="relative flex h-2 w-2">
+      <span className="relative flex h-2 w-2 shrink-0">
         {isLive && (
           <span
             className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dot}`}
@@ -17,7 +17,7 @@ export default function StatusBadge({ status, className = '' }) {
         )}
         <span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} />
       </span>
-      {status}
+      <span>{status}</span>
     </span>
   );
 }

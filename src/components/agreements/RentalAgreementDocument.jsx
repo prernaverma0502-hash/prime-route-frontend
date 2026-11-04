@@ -44,8 +44,15 @@ export default function RentalAgreementDocument({
   const data = agreementData;
   const signingDateStr = signedAt ? formatDate(signedAt) : new Date().toLocaleDateString();
 
+  const displayDriverName = data.driverName || data.renter || 'N/A';
+  const displayDriverLicense = data.driverLicense || data.license || 'N/A';
+  const displayDriverPhone = data.driverPhone || data.phone || 'N/A';
+  const displayDriverEmail = data.driverEmail || data.email || 'N/A';
+  const displayVehicleVin = data.vehicleVin || data.vin || 'N/A';
+  const displayVehiclePlate = data.vehiclePlate || data.plate || 'N/A';
+
   return (
-    <div className="printable-agreement bg-white text-slate-900 font-serif leading-relaxed text-[13px] sm:text-[14px] p-6 sm:p-10 border border-slate-200 rounded-2xl shadow-sm max-w-3xl mx-auto space-y-6">
+    <div className="printable-agreement bg-white text-slate-900 font-serif leading-relaxed text-[13px] sm:text-[14px] p-4 sm:p-8 md:p-10 border border-slate-200 rounded-2xl shadow-sm max-w-3xl mx-auto space-y-6">
       {/* Header with PrimeRoute Official Emblem */}
       <div className="text-center space-y-2 border-b border-slate-300 pb-5">
         <div className="flex justify-center mb-2">
@@ -78,25 +85,25 @@ export default function RentalAgreementDocument({
           <div>
             <span className="text-slate-500 block">Full Name:</span>
             <span className="font-bold text-slate-900 text-sm border-b border-slate-300 pb-0.5 block">
-              {data.driverName || 'N/A'}
+              {displayDriverName}
             </span>
           </div>
           <div>
             <span className="text-slate-500 block">Driver License (DL#):</span>
             <span className="font-bold font-mono text-slate-900 border-b border-slate-300 pb-0.5 block">
-              {data.driverLicense || 'N/A'}
+              {displayDriverLicense}
             </span>
           </div>
           <div>
             <span className="text-slate-500 block">Phone:</span>
             <span className="font-medium text-slate-800 border-b border-slate-300 pb-0.5 block">
-              {data.driverPhone || 'N/A'}
+              {displayDriverPhone}
             </span>
           </div>
           <div>
             <span className="text-slate-500 block">Email:</span>
             <span className="font-medium text-slate-800 border-b border-slate-300 pb-0.5 block">
-              {data.driverEmail || 'N/A'}
+              {displayDriverEmail}
             </span>
           </div>
         </div>
@@ -138,13 +145,13 @@ export default function RentalAgreementDocument({
           <div className="sm:col-span-1">
             <span className="text-slate-500 block">VIN:</span>
             <span className="font-bold font-mono text-slate-900 border-b border-slate-300 pb-0.5 block truncate">
-              {data.vehicleVin || 'N/A'}
+              {displayVehicleVin}
             </span>
           </div>
           <div>
             <span className="text-slate-500 block">License Plate:</span>
             <span className="font-bold font-mono text-slate-900 border-b border-slate-300 pb-0.5 block">
-              {data.vehiclePlate || 'N/A'}
+              {displayVehiclePlate}
             </span>
           </div>
           <div>
@@ -316,7 +323,7 @@ export default function RentalAgreementDocument({
           <div>
             <span className="text-xs font-sans text-slate-500 block">Driver (Renter):</span>
             <span className="text-sm font-bold font-sans text-[#0A1E42] border-b border-slate-400 block pb-1">
-              {data.driverName || '__________________'}
+              {displayDriverName !== 'N/A' ? displayDriverName : '__________________'}
             </span>
             
             <div className="grid grid-cols-2 gap-2 mt-2">
@@ -329,7 +336,7 @@ export default function RentalAgreementDocument({
               <div>
                 <span className="text-xs font-sans text-slate-500 block">DL#:</span>
                 <span className="text-xs font-mono font-bold text-slate-800 border-b border-slate-400 block pb-1">
-                  {data.driverLicense || '__________________'}
+                  {displayDriverLicense !== 'N/A' ? displayDriverLicense : '__________________'}
                 </span>
               </div>
             </div>

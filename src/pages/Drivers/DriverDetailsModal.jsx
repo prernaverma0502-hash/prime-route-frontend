@@ -56,6 +56,7 @@ export default function DriverDetailsModal({
             <img
               src={driver.avatar}
               alt={driver.name}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
               className="w-24 h-24 rounded-2xl object-cover ring-4 ring-white/20 shadow-xl"
             />
             <div className="text-center sm:text-left">

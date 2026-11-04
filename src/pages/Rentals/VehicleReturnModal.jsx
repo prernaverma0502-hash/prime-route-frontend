@@ -175,15 +175,17 @@ export default function VehicleReturnModal({
     const returnDateTimeISO = `${formData.returnDate}T${formData.returnTime || '12:00'}:00`;
     const combinedCondition = `${formData.exteriorCondition} • Interior: ${formData.interiorCondition}`;
 
-    // 1. Determine vehicle status transition
+    // 1. Determine vehicle status transition & update vehicle mileage
     const newVehicleStatus = formData.hasDamage ? 'Maintenance' : 'Available';
-    if (rental.vehicleId) {
-      updateVehicleStatus(rental.vehicleId, newVehicleStatus, 'Unassigned');
+    const targetVehicleRef = rental.vehicleId || vehicle?.id || vehicle?.plate || rental.vehicle;
+    if (targetVehicleRef) {
+      updateVehicleStatus(targetVehicleRef, newVehicleStatus, 'Unassigned', returnOdoNum);
     }
 
     // 2. Clear driver vehicle assignment
-    if (rental.driverId) {
-      updateDriverVehicle(rental.driverId, 'Unassigned');
+    const targetDriverRef = rental.driverId || driver?.id || driver?.name || rental.driver;
+    if (targetDriverRef) {
+      updateDriverVehicle(targetDriverRef, 'Unassigned');
     }
 
     // 3. Create linked Inspection Record
@@ -628,7 +630,7 @@ export default function VehicleReturnModal({
         )}
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 no-print">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 no-print">
           <button
             type="button"
             onClick={onClose}
