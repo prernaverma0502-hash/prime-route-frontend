@@ -1,0 +1,1186 @@
+// PrimeRoute Complete Mock Data Store
+
+export const initialStats = {
+  totalVehicles: 65,
+  vehiclesChange: '+2 new',
+  activeDrivers: 48,
+  driversChange: '+3 this month',
+  monthlyRevenue: 48750,
+  revenueChange: '+12%',
+  monthlyExpenses: 18420,
+  expensesChange: '+8%',
+  netProfit: 30330,
+  profitChange: '+14%',
+};
+
+export const fleetStatusData = [
+  { name: 'Rented', value: 42, color: '#075EE8' },
+  { name: 'Available', value: 12, color: '#10B981' },
+  { name: 'Reserved', value: 4, color: '#6366F1' },
+  { name: 'Maintenance', value: 4, color: '#F97316' },
+  { name: 'Unavailable', value: 2, color: '#EF4444' },
+  { name: 'Sold / Retired', value: 1, color: '#94A3B8' },
+];
+
+export const revenueOverviewData = {
+  'This Month': [
+    { month: 'Jan', revenue: 27000, expenses: 10500 },
+    { month: 'Feb', revenue: 33000, expenses: 15500 },
+    { month: 'Mar', revenue: 36000, expenses: 19000 },
+    { month: 'Apr', revenue: 34000, expenses: 17000 },
+    { month: 'May', revenue: 38000, expenses: 21000 },
+    { month: 'Jun', revenue: 43000, expenses: 24000 },
+    { month: 'Jul', revenue: 48750, expenses: 18420 },
+  ],
+  'Last 6 Months': [
+    { month: 'Feb', revenue: 33000, expenses: 15500 },
+    { month: 'Mar', revenue: 36000, expenses: 19000 },
+    { month: 'Apr', revenue: 34000, expenses: 17000 },
+    { month: 'May', revenue: 38000, expenses: 21000 },
+    { month: 'Jun', revenue: 43000, expenses: 24000 },
+    { month: 'Jul', revenue: 48750, expenses: 18420 },
+  ],
+  'This Year': [
+    { month: 'Jan', revenue: 27000, expenses: 10500 },
+    { month: 'Feb', revenue: 33000, expenses: 15500 },
+    { month: 'Mar', revenue: 36000, expenses: 19000 },
+    { month: 'Apr', revenue: 34000, expenses: 17000 },
+    { month: 'May', revenue: 38000, expenses: 21000 },
+    { month: 'Jun', revenue: 43000, expenses: 24000 },
+    { month: 'Jul', revenue: 48750, expenses: 18420 },
+    { month: 'Aug', revenue: 51000, expenses: 22000 },
+    { month: 'Sep', revenue: 54000, expenses: 25000 },
+    { month: 'Oct', revenue: 58000, expenses: 26000 },
+    { month: 'Nov', revenue: 62000, expenses: 27000 },
+    { month: 'Dec', revenue: 67000, expenses: 29000 },
+  ]
+};
+
+export const financialSummaryData = {
+  totalRevenue: 482500,
+  totalExpenses: 251200,
+  netProfit: 231300,
+  profitGrowth: '+16%',
+  monthlyBars: [
+    { month: 'Jan', revenue: 24000 },
+    { month: 'Feb', revenue: 28000 },
+    { month: 'Mar', revenue: 32000 },
+    { month: 'Apr', revenue: 35000 },
+    { month: 'May', revenue: 37500 },
+    { month: 'Jun', revenue: 36000 },
+    { month: 'Jul', revenue: 41000 },
+    { month: 'Aug', revenue: 44000 },
+    { month: 'Sep', revenue: 47000 },
+    { month: 'Oct', revenue: 49000 },
+    { month: 'Nov', revenue: 51000 },
+    { month: 'Dec', revenue: 58000 },
+  ]
+};
+
+export const importantAlerts = [
+  {
+    id: 1,
+    title: '3 Contracts Expire Soon',
+    badge: 'Next 7 days',
+    type: 'contract',
+    severity: 'danger',
+    color: 'text-rose-500',
+    bgColor: 'bg-rose-50',
+    link: 'rentals'
+  },
+  {
+    id: 2,
+    title: '2 Vehicles Due for Oil Change',
+    badge: 'Next 7 days',
+    type: 'maintenance',
+    severity: 'warning',
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-50',
+    link: 'maintenance'
+  },
+  {
+    id: 3,
+    title: '1 Unpaid Ticket',
+    badge: '$75',
+    type: 'ticket',
+    severity: 'danger',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-50',
+    link: 'tolls-tickets'
+  },
+  {
+    id: 4,
+    title: '4 Documents Expiring',
+    badge: 'Next 30 days',
+    type: 'document',
+    severity: 'info',
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-50',
+    link: 'documents'
+  },
+  {
+    id: 5,
+    title: '1 Driver with Outstanding Balance',
+    badge: '$350',
+    type: 'balance',
+    severity: 'warning',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    link: 'drivers'
+  },
+];
+
+export const topVehicles = [
+  {
+    id: 1,
+    rank: 1,
+    name: 'Toyota Camry',
+    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=150&auto=format&fit=crop&q=80',
+    revenue: 8500,
+    profit: 6200,
+    trips: 42,
+    plate: 'PR-2024-TC',
+  },
+  {
+    id: 2,
+    rank: 2,
+    name: 'Honda Accord',
+    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=150&auto=format&fit=crop&q=80',
+    revenue: 7950,
+    profit: 5900,
+    trips: 38,
+    plate: 'PR-2024-HA',
+  },
+  {
+    id: 3,
+    rank: 3,
+    name: 'Hyundai Sonata',
+    image: 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=150&auto=format&fit=crop&q=80',
+    revenue: 7800,
+    profit: 5600,
+    trips: 36,
+    plate: 'PR-2024-HS',
+  },
+  {
+    id: 4,
+    rank: 4,
+    name: 'Chevrolet Malibu',
+    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=150&auto=format&fit=crop&q=80',
+    revenue: 7200,
+    profit: 5100,
+    trips: 34,
+    plate: 'PR-2024-CM',
+  },
+  {
+    id: 5,
+    rank: 5,
+    name: 'Tesla Model 3',
+    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=150&auto=format&fit=crop&q=80',
+    revenue: 6950,
+    profit: 4800,
+    trips: 31,
+    plate: 'PR-2024-TM',
+  },
+];
+
+export const upcomingMaintenanceList = [
+  {
+    id: 1,
+    vehicle: 'Toyota Camry',
+    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=150&auto=format&fit=crop&q=80',
+    type: 'Oil Change - 5,000 miles',
+    date: 'Due Soon (1 day)',
+    isUrgent: true,
+  },
+  {
+    id: 2,
+    vehicle: 'Honda Accord',
+    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=150&auto=format&fit=crop&q=80',
+    type: 'Brake Service',
+    date: 'Jul 20, 2025',
+    isUrgent: false,
+  },
+  {
+    id: 3,
+    vehicle: 'Chevrolet Tahoe',
+    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=150&auto=format&fit=crop&q=80',
+    type: 'General Checkup',
+    date: 'Jul 25, 2025',
+    isUrgent: false,
+  },
+];
+
+// All Vehicles List for Vehicles Module
+export const initialVehicles = [
+  {
+    id: 'VEH-001',
+    name: 'Toyota Camry SE',
+    plate: 'PR-2024-TC',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    type: 'Sedan',
+    fuel: 'Hybrid',
+    transmission: 'Automatic',
+    status: 'Rented',
+    driver: 'Marcus Vance',
+    color: 'Midnight Black',
+    mileage: '24,500 mi',
+    vin: '4T1B11HK5JU192831',
+    purchasePrice: 28500,
+    insuranceExpiry: '2025-11-15',
+    registrationExpiry: '2025-10-30',
+    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 65,
+  },
+  {
+    id: 'VEH-002',
+    name: 'Honda Accord Sport',
+    plate: 'PR-2024-HA',
+    make: 'Honda',
+    model: 'Accord',
+    year: 2023,
+    type: 'Sedan',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Rented',
+    driver: 'David Miller',
+    color: 'Platinum White',
+    mileage: '31,200 mi',
+    vin: '1HGCR2F83HA029341',
+    purchasePrice: 29800,
+    insuranceExpiry: '2025-08-20',
+    registrationExpiry: '2025-09-15',
+    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 70,
+  },
+  {
+    id: 'VEH-003',
+    name: 'Hyundai Sonata SEL',
+    plate: 'PR-2024-HS',
+    make: 'Hyundai',
+    model: 'Sonata',
+    year: 2022,
+    type: 'Sedan',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Rented',
+    driver: 'Sarah Jenkins',
+    color: 'Electric Shadow',
+    mileage: '42,100 mi',
+    vin: '5NPE24AF9NH194821',
+    purchasePrice: 26200,
+    insuranceExpiry: '2025-07-28',
+    registrationExpiry: '2025-08-10',
+    image: 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 60,
+  },
+  {
+    id: 'VEH-004',
+    name: 'Chevrolet Malibu LT',
+    plate: 'PR-2024-CM',
+    make: 'Chevrolet',
+    model: 'Malibu',
+    year: 2023,
+    type: 'Sedan',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Available',
+    driver: 'Unassigned',
+    color: 'Dark Ash Metallic',
+    mileage: '19,800 mi',
+    vin: '1G1ZD5ST8LF104928',
+    purchasePrice: 27400,
+    insuranceExpiry: '2026-01-14',
+    registrationExpiry: '2025-12-05',
+    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 58,
+  },
+  {
+    id: 'VEH-005',
+    name: 'Tesla Model 3 Long Range',
+    plate: 'PR-2024-TM',
+    make: 'Tesla',
+    model: 'Model 3',
+    year: 2024,
+    type: 'Electric',
+    fuel: 'Electric',
+    transmission: 'Automatic',
+    status: 'Rented',
+    driver: 'Alexander Reed',
+    color: 'Deep Blue Metallic',
+    mileage: '14,300 mi',
+    vin: '5YJ3E1EB8NF839210',
+    purchasePrice: 44000,
+    insuranceExpiry: '2026-03-22',
+    registrationExpiry: '2026-02-18',
+    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 95,
+  },
+  {
+    id: 'VEH-006',
+    name: 'Chevrolet Tahoe Premier',
+    plate: 'PR-2024-CT',
+    make: 'Chevrolet',
+    model: 'Tahoe',
+    year: 2023,
+    type: 'SUV',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Maintenance',
+    driver: 'In Service',
+    color: 'Summit White',
+    mileage: '38,900 mi',
+    vin: '1GNSKBKC9PR901842',
+    purchasePrice: 62500,
+    insuranceExpiry: '2025-09-10',
+    registrationExpiry: '2025-08-30',
+    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 120,
+  },
+  {
+    id: 'VEH-007',
+    name: 'Ford F-150 Lariat',
+    plate: 'PR-2024-FF',
+    make: 'Ford',
+    model: 'F-150',
+    year: 2023,
+    type: 'Truck',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Available',
+    driver: 'Unassigned',
+    color: 'Carbonized Gray',
+    mileage: '22,400 mi',
+    vin: '1FTFW1ED6PFB92841',
+    purchasePrice: 56000,
+    insuranceExpiry: '2025-10-18',
+    registrationExpiry: '2025-10-02',
+    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 110,
+  },
+  {
+    id: 'VEH-008',
+    name: 'BMW 530i M Sport',
+    plate: 'PR-2024-BM',
+    make: 'BMW',
+    model: '5 Series',
+    year: 2024,
+    type: 'Luxury',
+    fuel: 'Gasoline',
+    transmission: 'Automatic',
+    status: 'Rented',
+    driver: 'Elena Rostova',
+    color: 'Alpine White',
+    mileage: '11,200 mi',
+    vin: 'WBA53BJ04NW849102',
+    purchasePrice: 64900,
+    insuranceExpiry: '2026-05-15',
+    registrationExpiry: '2026-04-30',
+    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&auto=format&fit=crop&q=80',
+    dailyRate: 135,
+  }
+];
+
+// Drivers Data
+export const initialDrivers = [
+  {
+    id: 'DRV-101',
+    name: 'Marcus Vance',
+    phone: '+1 (555) 234-8901',
+    email: 'marcus.vance@primeroute.io',
+    license: 'DL-NY-9028148',
+    licenseExpiry: '2026-09-14',
+    vehicle: 'Toyota Camry SE (PR-2024-TC)',
+    status: 'Active',
+    balance: 0,
+    address: '142 W 57th St, New York, NY 10019',
+    dob: '1988-04-12',
+    joiningDate: '2023-02-15',
+    emergencyContact: 'Rachel Vance (+1 555-901-2244)',
+    rating: 4.9,
+    tripsCount: 312,
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,400/mo'
+  },
+  {
+    id: 'DRV-102',
+    name: 'David Miller',
+    phone: '+1 (555) 345-6712',
+    email: 'david.miller@gmail.com',
+    license: 'DL-CA-4491029',
+    licenseExpiry: '2026-11-20',
+    vehicle: 'Honda Accord Sport (PR-2024-HA)',
+    status: 'Active',
+    balance: 0,
+    address: '894 Elm Street, Los Angeles, CA 90014',
+    dob: '1991-08-25',
+    joiningDate: '2023-05-10',
+    emergencyContact: 'Jessica Miller (+1 555-892-1100)',
+    rating: 4.8,
+    tripsCount: 284,
+    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,400/mo'
+  },
+  {
+    id: 'DRV-103',
+    name: 'Sarah Jenkins',
+    phone: '+1 (555) 456-7890',
+    email: 'sjenkins@outlook.com',
+    license: 'DL-IL-8849103',
+    licenseExpiry: '2025-08-30',
+    vehicle: 'Hyundai Sonata SEL (PR-2024-HS)',
+    status: 'Active',
+    balance: 350,
+    address: '320 N Michigan Ave, Chicago, IL 60601',
+    dob: '1994-01-19',
+    joiningDate: '2023-09-01',
+    emergencyContact: 'Thomas Jenkins (+1 555-442-9981)',
+    rating: 4.7,
+    tripsCount: 198,
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,200/mo'
+  },
+  {
+    id: 'DRV-104',
+    name: 'Alexander Reed',
+    phone: '+1 (555) 789-0123',
+    email: 'alex.reed@primefleet.com',
+    license: 'DL-TX-3391024',
+    licenseExpiry: '2027-04-10',
+    vehicle: 'Tesla Model 3 (PR-2024-TM)',
+    status: 'Active',
+    balance: 0,
+    address: '500 Congress Ave, Austin, TX 78701',
+    dob: '1989-11-05',
+    joiningDate: '2022-11-14',
+    emergencyContact: 'Maria Reed (+1 555-331-8842)',
+    rating: 5.0,
+    tripsCount: 420,
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,600/mo'
+  },
+  {
+    id: 'DRV-105',
+    name: 'Elena Rostova',
+    phone: '+1 (555) 678-9012',
+    email: 'elena.rostova@vipdrive.com',
+    license: 'DL-FL-7729104',
+    licenseExpiry: '2026-06-18',
+    vehicle: 'BMW 530i M Sport (PR-2024-BM)',
+    status: 'Active',
+    balance: 0,
+    address: '1100 Brickell Bay Dr, Miami, FL 33131',
+    dob: '1993-07-22',
+    joiningDate: '2024-01-10',
+    emergencyContact: 'Ivan Rostov (+1 555-773-1920)',
+    rating: 4.9,
+    tripsCount: 154,
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,800/mo'
+  },
+  {
+    id: 'DRV-106',
+    name: 'Robert Sterling',
+    phone: '+1 (555) 890-1234',
+    email: 'r.sterling@transport.net',
+    license: 'DL-WA-5592810',
+    licenseExpiry: '2025-07-15',
+    vehicle: 'None (Standby)',
+    status: 'Inactive',
+    balance: 0,
+    address: '701 5th Ave, Seattle, WA 98104',
+    dob: '1985-03-30',
+    joiningDate: '2023-08-01',
+    emergencyContact: 'Grace Sterling (+1 555-881-2299)',
+    rating: 4.5,
+    tripsCount: 110,
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    salaryRate: '$2,100/mo'
+  }
+];
+
+export const mockVehicles = initialVehicles;
+export const mockDrivers = initialDrivers;
+
+// Rentals Data
+export const initialRentals = [
+  {
+    id: 'RNT-2024-089',
+    customer: 'Apex Logistics LLC',
+    customerPhone: '+1 (555) 883-1920',
+    customerEmail: 'fleet@apexlogistics.com',
+    vehicle: 'Toyota Camry SE (PR-2024-TC)',
+    driver: 'Marcus Vance',
+    startDate: '2025-07-01',
+    endDate: '2025-07-15',
+    rentalType: 'Monthly Lease',
+    pickupLocation: 'JFK Airport Fleet Hub',
+    dropoffLocation: 'Manhattan Financial Center',
+    amount: 1950,
+    deposit: 500,
+    tax: 156,
+    discount: 50,
+    total: 2056,
+    paymentStatus: 'Paid',
+    status: 'Active',
+    paymentMethod: 'Corporate ACH',
+    notes: 'Premium commercial fleet lease agreement.'
+  },
+  {
+    id: 'RNT-2024-090',
+    customer: 'Summit Executive Travel',
+    customerPhone: '+1 (555) 772-9918',
+    customerEmail: 'dispatch@summittravel.com',
+    vehicle: 'BMW 530i M Sport (PR-2024-BM)',
+    driver: 'Elena Rostova',
+    startDate: '2025-07-05',
+    endDate: '2025-07-20',
+    rentalType: 'Executive VIP',
+    pickupLocation: 'Miami Downtown Hub',
+    dropoffLocation: 'Miami Intl Airport',
+    amount: 2700,
+    deposit: 1000,
+    tax: 216,
+    discount: 0,
+    total: 2916,
+    paymentStatus: 'Paid',
+    status: 'Active',
+    paymentMethod: 'Credit Card',
+    notes: 'Includes VIP driver concierge service.'
+  },
+  {
+    id: 'RNT-2024-091',
+    customer: 'GreenEnergy Tech Corp',
+    customerPhone: '+1 (555) 441-3329',
+    customerEmail: 'admin@greenenergy.io',
+    vehicle: 'Tesla Model 3 (PR-2024-TM)',
+    driver: 'Alexander Reed',
+    startDate: '2025-07-10',
+    endDate: '2025-07-24',
+    rentalType: 'Eco Fleet Rental',
+    pickupLocation: 'Austin Domain Tech Center',
+    dropoffLocation: 'Austin Bergstrom Airport',
+    amount: 1850,
+    deposit: 500,
+    tax: 148,
+    discount: 100,
+    total: 1898,
+    paymentStatus: 'Pending',
+    status: 'Active',
+    paymentMethod: 'Bank Wire',
+    notes: 'Supercharging allowance included.'
+  },
+  {
+    id: 'RNT-2024-092',
+    customer: 'Metro Express Couriers',
+    customerPhone: '+1 (555) 993-2281',
+    customerEmail: 'operations@metrocouriers.com',
+    vehicle: 'Honda Accord Sport (PR-2024-HA)',
+    driver: 'David Miller',
+    startDate: '2025-06-15',
+    endDate: '2025-07-12',
+    rentalType: 'Long Term Lease',
+    pickupLocation: 'LAX Cargo Hub',
+    dropoffLocation: 'LAX Cargo Hub',
+    amount: 2100,
+    deposit: 600,
+    tax: 168,
+    discount: 0,
+    total: 2268,
+    paymentStatus: 'Paid',
+    status: 'Completed',
+    paymentMethod: 'Corporate Card',
+    notes: 'Vehicle returned in pristine condition.'
+  },
+  {
+    id: 'RNT-2024-093',
+    customer: 'Vanguard Media Group',
+    customerPhone: '+1 (555) 231-9988',
+    customerEmail: 'production@vanguardmedia.com',
+    vehicle: 'Ford F-150 Lariat (PR-2024-FF)',
+    driver: 'Standby Driver',
+    startDate: '2025-07-22',
+    endDate: '2025-07-29',
+    rentalType: 'Commercial Weekly',
+    pickupLocation: 'Central Dispatch Yard',
+    dropoffLocation: 'Central Dispatch Yard',
+    amount: 1100,
+    deposit: 500,
+    tax: 88,
+    discount: 50,
+    total: 1138,
+    paymentStatus: 'Pending',
+    status: 'Upcoming',
+    paymentMethod: 'Credit Card',
+    notes: 'Tow package requested for filming gear.'
+  }
+];
+
+// Accounting Data
+export const initialInvoices = [
+  {
+    id: 'INV-2025-001',
+    customer: 'Apex Logistics LLC',
+    rentalId: 'RNT-2024-089',
+    vehicle: 'Toyota Camry SE',
+    date: '2025-07-01',
+    dueDate: '2025-07-15',
+    subtotal: 1950,
+    tax: 156,
+    discount: 50,
+    total: 2056,
+    status: 'Paid',
+    paymentMethod: 'ACH Transfer'
+  },
+  {
+    id: 'INV-2025-002',
+    customer: 'Summit Executive Travel',
+    rentalId: 'RNT-2024-090',
+    vehicle: 'BMW 530i M Sport',
+    date: '2025-07-05',
+    dueDate: '2025-07-20',
+    subtotal: 2700,
+    tax: 216,
+    discount: 0,
+    total: 2916,
+    status: 'Paid',
+    paymentMethod: 'Credit Card'
+  },
+  {
+    id: 'INV-2025-003',
+    customer: 'GreenEnergy Tech Corp',
+    rentalId: 'RNT-2024-091',
+    vehicle: 'Tesla Model 3',
+    date: '2025-07-10',
+    dueDate: '2025-07-25',
+    subtotal: 1850,
+    tax: 148,
+    discount: 100,
+    total: 1898,
+    status: 'Pending',
+    paymentMethod: 'Bank Wire'
+  },
+  {
+    id: 'INV-2025-004',
+    customer: 'Skyline Transport Co',
+    rentalId: 'RNT-2024-077',
+    vehicle: 'Hyundai Sonata SEL',
+    date: '2025-06-20',
+    dueDate: '2025-07-05',
+    subtotal: 1450,
+    tax: 116,
+    discount: 0,
+    total: 1566,
+    status: 'Overdue',
+    paymentMethod: 'Invoice'
+  }
+];
+
+export const initialExpenses = [
+  {
+    id: 'EXP-1041',
+    category: 'Fleet Fuel & EV Charging',
+    description: 'Bulk Fleet fuel card recharge',
+    vehicle: 'Fleet Wide',
+    amount: 4250,
+    date: '2025-07-08',
+    vendor: 'Shell Fleet Solutions',
+    status: 'Paid'
+  },
+  {
+    id: 'EXP-1042',
+    category: 'Vehicle Maintenance',
+    description: 'Brake overhaul and synthetic fluids',
+    vehicle: 'Honda Accord Sport',
+    amount: 820,
+    date: '2025-07-05',
+    vendor: 'Speedy Pro Auto Clinic',
+    status: 'Paid'
+  },
+  {
+    id: 'EXP-1043',
+    category: 'Insurance Premiums',
+    description: 'Commercial Fleet Policy Q3',
+    vehicle: 'All 65 Units',
+    amount: 8900,
+    date: '2025-07-01',
+    vendor: 'Travelers Commercial Marine & Auto',
+    status: 'Paid'
+  },
+  {
+    id: 'EXP-1044',
+    category: 'Tolls & Violations',
+    description: 'Monthly E-ZPass toll statement',
+    vehicle: 'Multiple Fleet Units',
+    amount: 1450,
+    date: '2025-07-03',
+    vendor: 'MTA / Port Authority Bridges',
+    status: 'Paid'
+  },
+  {
+    id: 'EXP-1045',
+    category: 'Software & Telematics',
+    description: 'GPS tracking and IoT Fleet Telematics',
+    vehicle: 'Fleet System',
+    amount: 650,
+    date: '2025-07-02',
+    vendor: 'Samsara Fleet Cloud',
+    status: 'Paid'
+  }
+];
+
+export const initialIncome = [
+  {
+    id: 'INC-201',
+    source: 'Vehicle Rental Lease',
+    customer: 'Apex Logistics LLC',
+    amount: 2056,
+    date: '2025-07-01',
+    paymentMethod: 'Corporate ACH',
+    status: 'Completed'
+  },
+  {
+    id: 'INC-202',
+    source: 'Executive VIP Chauffeur',
+    customer: 'Summit Executive Travel',
+    amount: 2916,
+    date: '2025-07-05',
+    paymentMethod: 'Credit Card',
+    status: 'Completed'
+  },
+  {
+    id: 'INC-203',
+    source: 'Monthly Fleet Subscription',
+    customer: 'Omni Courier Services',
+    amount: 3450,
+    date: '2025-07-07',
+    paymentMethod: 'Bank Wire',
+    status: 'Completed'
+  },
+  {
+    id: 'INC-204',
+    source: 'Short-term Airport Rentals',
+    customer: 'Private Leisure Clients',
+    amount: 4890,
+    date: '2025-07-09',
+    paymentMethod: 'Stripe Terminal',
+    status: 'Completed'
+  }
+];
+
+// Maintenance Records
+export const initialMaintenance = [
+  {
+    id: 'MNT-301',
+    vehicle: 'Toyota Camry SE',
+    plate: 'PR-2024-TC',
+    category: 'Oil & Filter',
+    type: 'Oil Change - 5,000 miles',
+    serviceDate: '2025-07-13',
+    nextServiceDate: '2025-10-13',
+    mileage: '24,500 mi',
+    provider: 'QuickLube Express Center',
+    cost: 85,
+    status: 'Scheduled',
+    notes: 'Synthetic 0W-20 oil, tire rotation, fluid top-off.'
+  },
+  {
+    id: 'MNT-302',
+    vehicle: 'Honda Accord Sport',
+    plate: 'PR-2024-HA',
+    category: 'Brakes & Suspension',
+    type: 'Brake Service & Pad Replacement',
+    serviceDate: '2025-07-20',
+    nextServiceDate: '2026-01-20',
+    mileage: '31,200 mi',
+    provider: 'Speedy Pro Auto Clinic',
+    cost: 340,
+    status: 'Scheduled',
+    notes: 'Front ceramic pads replacement and rotor resurfacing.'
+  },
+  {
+    id: 'MNT-303',
+    vehicle: 'Chevrolet Tahoe Premier',
+    plate: 'PR-2024-CT',
+    category: 'Engine & Transmission',
+    type: 'Transmission Flush & Checkup',
+    serviceDate: '2025-07-10',
+    nextServiceDate: '2026-01-10',
+    mileage: '38,900 mi',
+    provider: 'Chevy Certified Service',
+    cost: 580,
+    status: 'In Progress',
+    notes: 'Complete 40k inspection milestone.'
+  },
+  {
+    id: 'MNT-304',
+    vehicle: 'Hyundai Sonata SEL',
+    plate: 'PR-2024-HS',
+    category: 'Tires & Alignment',
+    type: '4-Wheel Balance and Alignment',
+    serviceDate: '2025-06-18',
+    nextServiceDate: '2025-12-18',
+    mileage: '41,000 mi',
+    provider: 'Goodyear Fleet Center',
+    cost: 160,
+    status: 'Completed',
+    notes: 'High speed vibration solved.'
+  },
+  {
+    id: 'MNT-305',
+    vehicle: 'Ford F-150 Lariat',
+    plate: 'PR-2024-FF',
+    category: 'Air Conditioning',
+    type: 'A/C Evaporator Service',
+    serviceDate: '2025-07-02',
+    nextServiceDate: '2026-07-02',
+    mileage: '22,400 mi',
+    provider: 'Metro Ford Fleet Works',
+    cost: 290,
+    status: 'Completed',
+    notes: 'Refrigerant recharged.'
+  }
+];
+
+// Tolls & Tickets
+export const initialTickets = [
+  {
+    id: 'TCK-8901',
+    ticketNumber: 'NYC-PARK-881923',
+    issuingAuthority: 'NYC Department of Finance',
+    vehicle: 'Hyundai Sonata SEL (PR-2024-HS)',
+    driver: 'Sarah Jenkins',
+    type: 'Parking Violation',
+    date: '2025-07-04',
+    location: '45th St & 7th Ave, Manhattan',
+    fineAmount: 75,
+    adminFee: 15,
+    dueDate: '2025-07-24',
+    status: 'Unpaid',
+    chargedToDriver: false,
+    notes: 'Double parked during delivery drop.'
+  },
+  {
+    id: 'TCK-8902',
+    ticketNumber: 'NJ-SPEED-201948',
+    issuingAuthority: 'NJ State Police / Turnpike Authority',
+    vehicle: 'Chevrolet Tahoe (PR-2024-CT)',
+    driver: 'Standby Driver',
+    type: 'Speed Camera (+11 mph)',
+    date: '2025-06-28',
+    location: 'Garden State Pkwy Mile 132',
+    fineAmount: 110,
+    adminFee: 15,
+    dueDate: '2025-07-15',
+    status: 'Paid',
+    chargedToDriver: true,
+    notes: 'Settled via auto-pay portal and deducted from driver balance.'
+  },
+  {
+    id: 'TCK-8903',
+    ticketNumber: 'MIA-BUS-109283',
+    issuingAuthority: 'Miami-Dade County Traffic Bureau',
+    vehicle: 'BMW 530i (PR-2024-BM)',
+    driver: 'Elena Rostova',
+    type: 'Bus Lane Camera Infraction',
+    date: '2025-06-15',
+    location: 'Biscayne Blvd, Miami',
+    fineAmount: 150,
+    adminFee: 20,
+    dueDate: '2025-07-05',
+    status: 'Paid',
+    chargedToDriver: true,
+    notes: 'Dispute filed; settled and charged to driver contract.'
+  }
+];
+
+// Inspections (Pickup & Return)
+export const initialInspections = [
+  {
+    id: 'INS-2025-081',
+    inspectionNumber: 'INSP-8819',
+    type: 'Check-out (Pickup)',
+    contractId: 'RNT-2025-001',
+    vehicle: 'Toyota Camry SE',
+    plate: 'PR-2024-TC',
+    driver: 'Sarah Jenkins',
+    date: '2025-07-01',
+    time: '09:30 AM',
+    odometer: 14200,
+    fuelLevel: 100, // percentage
+    exteriorCondition: 'Pristine / Clean',
+    interiorCondition: 'Clean & Sanitized',
+    tiresCondition: 'Good (8/32")',
+    windshieldStatus: 'Clear / No Cracks',
+    spareTirePresent: true,
+    inspector: 'Marcus Brody (Fleet Tech)',
+    status: 'Passed',
+    notes: 'Pre-rental inspection completed with driver present. Vehicle handed over with full tank.',
+    driverSignature: 'Sarah Jenkins',
+    photos: [
+      { id: 1, label: 'Front Exterior', url: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=500&auto=format&fit=crop&q=60' },
+      { id: 2, label: 'Rear Bumper', url: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=500&auto=format&fit=crop&q=60' },
+      { id: 3, label: 'Interior Dashboard', url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&auto=format&fit=crop&q=60' }
+    ]
+  },
+  {
+    id: 'INS-2025-082',
+    inspectionNumber: 'INSP-8824',
+    type: 'Check-in (Return)',
+    contractId: 'RNT-2024-098',
+    vehicle: 'Honda Accord Sport',
+    plate: 'PR-2024-HA',
+    driver: 'David Miller',
+    date: '2025-07-08',
+    time: '04:15 PM',
+    odometer: 28450,
+    fuelLevel: 75, // 25% missing
+    exteriorCondition: 'Minor Scratches',
+    interiorCondition: 'Acceptable',
+    tiresCondition: 'Good (7/32")',
+    windshieldStatus: 'Clear',
+    spareTirePresent: true,
+    inspector: 'Lisa Ray (Ops)',
+    status: 'Damage Detected',
+    notes: 'Passenger rear quarter panel has 3-inch surface scratch. Fuel returned at 3/4 (full tank required). Refuel fee $25 applied.',
+    driverSignature: 'David Miller',
+    photos: [
+      { id: 1, label: 'Quarter Panel Scratch', url: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&auto=format&fit=crop&q=60' },
+      { id: 2, label: 'Odometer & Fuel Gauge', url: 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=500&auto=format&fit=crop&q=60' }
+    ]
+  },
+  {
+    id: 'INS-2025-083',
+    inspectionNumber: 'INSP-8830',
+    type: 'Check-out (Pickup)',
+    contractId: 'RNT-2025-002',
+    vehicle: 'Tesla Model 3',
+    plate: 'PR-2024-TM',
+    driver: 'Michael Chang',
+    date: '2025-07-10',
+    time: '11:00 AM',
+    odometer: 19800,
+    fuelLevel: 95, // battery
+    exteriorCondition: 'Pristine / Clean',
+    interiorCondition: 'Clean & Sanitized',
+    tiresCondition: 'Good (8/32")',
+    windshieldStatus: 'Clear',
+    spareTirePresent: true,
+    inspector: 'Marcus Brody (Fleet Tech)',
+    status: 'Passed',
+    notes: 'Mobile charging connector verified in trunk. Battery charged to 95%.',
+    driverSignature: 'Michael Chang',
+    photos: [
+      { id: 1, label: 'Front & Wheels', url: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=500&auto=format&fit=crop&q=60' }
+    ]
+  }
+];
+
+// Accidents & Incident Claims
+export const initialAccidents = [
+  {
+    id: 'ACC-2025-012',
+    incidentDate: '2025-06-22',
+    vehicle: 'Hyundai Sonata SEL',
+    plate: 'PR-2024-HS',
+    driver: 'Sarah Jenkins',
+    location: 'I-95 South Exit 42, Newark NJ',
+    policeReportNumber: 'NJSP-2025-99812',
+    thirdPartyInfo: '2021 Ford Escape (Plate: NJ-882-KLB)',
+    damageDescription: 'Low-speed rear-end collision in stop-and-go traffic. Rear bumper dented and trunk lid misaligned.',
+    repairEstimate: 1450,
+    insuranceCarrier: 'Travelers Commercial Auto',
+    claimNumber: 'CLM-TRV-882190',
+    deductibleAmount: 500,
+    insurancePaid: 950,
+    driverRecovered: 500,
+    status: 'Settled',
+    assignedShop: 'Speedy Pro Auto Clinic',
+    notes: 'Driver deductible deducted from deposit. Body shop completed repair on July 2.'
+  },
+  {
+    id: 'ACC-2025-013',
+    incidentDate: '2025-07-06',
+    vehicle: 'Chevrolet Tahoe',
+    plate: 'PR-2024-CT',
+    driver: 'Standby Driver',
+    location: 'Commercial Depot Gate 3',
+    policeReportNumber: 'N/A (Private Yard)',
+    thirdPartyInfo: 'Depot Security Barrier Gate',
+    damageDescription: 'Passenger side mirror housing cracked against security gate post during night shift departure.',
+    repairEstimate: 380,
+    insuranceCarrier: 'Direct Fleet Expense (Below Deductible)',
+    claimNumber: 'N/A',
+    deductibleAmount: 500,
+    insurancePaid: 0,
+    driverRecovered: 380,
+    status: 'Approved',
+    assignedShop: 'Chevy Certified Service',
+    notes: 'Replacement OEM mirror assembly ordered; charged to driver balance.'
+  }
+];
+
+export const initialTolls = [
+  {
+    id: 'TOL-501',
+    vehicle: 'Toyota Camry (PR-2024-TC)',
+    tollLocation: 'Lincoln Tunnel Toll Plaza',
+    date: '2025-07-10 08:42 AM',
+    amount: 16.00,
+    status: 'Paid'
+  },
+  {
+    id: 'TOL-502',
+    vehicle: 'Tesla Model 3 (PR-2024-TM)',
+    tollLocation: 'MoPac Express Lane, Austin',
+    date: '2025-07-09 05:15 PM',
+    amount: 6.50,
+    status: 'Paid'
+  },
+  {
+    id: 'TOL-503',
+    vehicle: 'Ford F-150 (PR-2024-FF)',
+    tollLocation: 'George Washington Bridge Upper Level',
+    date: '2025-07-08 11:20 AM',
+    amount: 17.50,
+    status: 'Paid'
+  },
+  {
+    id: 'TOL-504',
+    vehicle: 'Honda Accord (PR-2024-HA)',
+    tollLocation: 'San Francisco Bay Bridge Plaza',
+    date: '2025-07-07 09:30 AM',
+    amount: 7.00,
+    status: 'Paid'
+  }
+];
+
+// Documents Data
+export const initialDocuments = [
+  {
+    id: 'DOC-101',
+    name: 'Fleet Commercial Auto Policy 2025-2026',
+    category: 'Insurance Documents',
+    relatedTo: 'All Vehicles (Fleet Policy)',
+    uploadDate: '2025-06-01',
+    expiryDate: '2026-06-01',
+    fileSize: '4.8 MB',
+    status: 'Valid',
+    fileType: 'PDF'
+  },
+  {
+    id: 'DOC-102',
+    name: 'Toyota Camry Registration Certificate',
+    category: 'Registration Documents',
+    relatedTo: 'Toyota Camry (PR-2024-TC)',
+    uploadDate: '2024-10-30',
+    expiryDate: '2025-10-30',
+    fileSize: '1.2 MB',
+    status: 'Valid',
+    fileType: 'PDF'
+  },
+  {
+    id: 'DOC-103',
+    name: 'Driver Commercial License - Sarah Jenkins',
+    category: 'Driver Documents',
+    relatedTo: 'Sarah Jenkins (DRV-103)',
+    uploadDate: '2022-08-30',
+    expiryDate: '2025-08-30',
+    fileSize: '850 KB',
+    status: 'Expiring Soon',
+    fileType: 'JPG'
+  },
+  {
+    id: 'DOC-104',
+    name: 'Master Lease Agreement - Apex Logistics',
+    category: 'Rental Agreements',
+    relatedTo: 'Apex Logistics LLC',
+    uploadDate: '2025-07-01',
+    expiryDate: '2026-07-01',
+    fileSize: '3.1 MB',
+    status: 'Valid',
+    fileType: 'PDF'
+  },
+  {
+    id: 'DOC-105',
+    name: 'Department of Transportation Fleet Permit',
+    category: 'Licenses',
+    relatedTo: 'Company Operations',
+    uploadDate: '2024-08-15',
+    expiryDate: '2025-08-15',
+    fileSize: '2.4 MB',
+    status: 'Expiring Soon',
+    fileType: 'PDF'
+  },
+  {
+    id: 'DOC-106',
+    name: 'Tesla Model 3 High Voltage Battery Warranty',
+    category: 'Vehicle Documents',
+    relatedTo: 'Tesla Model 3 (PR-2024-TM)',
+    uploadDate: '2024-03-22',
+    expiryDate: '2032-03-22',
+    fileSize: '1.9 MB',
+    status: 'Valid',
+    fileType: 'PDF'
+  }
+];
+
+// Settings Data
+export const initialSettings = {
+  company: {
+    name: 'PrimeRoute Global Fleet Systems',
+    tagline: 'Manage • Track • Grow',
+    email: 'admin@primeroute.io',
+    phone: '+1 (800) 555-ROUT',
+    address: '500 Madison Ave, Floor 24, New York, NY 10022',
+    website: 'https://primeroute.io',
+    taxId: 'US-EIN-948210382',
+    currency: 'USD ($)',
+    timezone: 'Eastern Standard Time (EST)',
+    dateFormat: 'YYYY-MM-DD'
+  },
+  users: [
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john.doe@primeroute.io',
+      role: 'Administrator',
+      status: 'Active',
+      lastLogin: 'Today, 10:20 AM'
+    },
+    {
+      id: 2,
+      name: 'Sarah Connor',
+      email: 's.connor@primeroute.io',
+      role: 'Fleet Manager',
+      status: 'Active',
+      lastLogin: 'Yesterday, 04:15 PM'
+    },
+    {
+      id: 3,
+      name: 'Michael Chang',
+      email: 'm.chang@primeroute.io',
+      role: 'Accountant',
+      status: 'Active',
+      lastLogin: 'Jul 09, 2025'
+    },
+    {
+      id: 4,
+      name: 'Lisa Ray',
+      email: 'lisa.ray@primeroute.io',
+      role: 'Operations Staff',
+      status: 'Inactive',
+      lastLogin: 'Jun 28, 2025'
+    }
+  ],
+  notifications: {
+    emailAlerts: true,
+    smsAlerts: false,
+    contractExpiryDays: 7,
+    maintenanceAlertDays: 7,
+    documentExpiryDays: 30,
+    ticketAlertImmediate: true,
+  }
+};
+
