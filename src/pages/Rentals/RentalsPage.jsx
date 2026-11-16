@@ -4,8 +4,6 @@ import {
   Plus,
   Download,
   Eye,
-  Edit2,
-  Trash2,
   CheckCircle2,
   Clock,
   Calendar,
@@ -539,51 +537,6 @@ export default function RentalsPage() {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-
-                            {/* Edit Action: Locked if signed */}
-                            <Can module="rentals" do="edit">
-                              {isSigned ? (
-                                <button
-                                  disabled
-                                  title="Locked: Legally executed signed contracts cannot be directly edited. Use Extend / Amend."
-                                  className="p-1.5 text-slate-300 cursor-not-allowed rounded-lg"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    setEditingRental(rental);
-                                    setIsAddModalOpen(true);
-                                  }}
-                                  title="Edit Agreement Draft"
-                                  className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </Can>
-
-                            {/* Delete Action: Locked if signed */}
-                            <Can module="rentals" do="archive">
-                              {isSigned ? (
-                                <button
-                                  disabled
-                                  title="Locked: Legally executed signed contracts cannot be deleted."
-                                  className="p-1.5 text-slate-300 cursor-not-allowed rounded-lg"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => setDeletingRental(rental)}
-                                  title="Cancel Draft Rental"
-                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </Can>
                           </div>
                         </td>
                       </tr>
