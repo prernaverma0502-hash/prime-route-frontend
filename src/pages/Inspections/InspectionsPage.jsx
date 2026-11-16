@@ -1,41 +1,39 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  ClipboardCheck,
   ShieldAlert,
-  CheckCircle2,
-  AlertTriangle,
   Plus,
   Download,
-  Eye,
-  Edit2,
-  Trash2,
-  Gauge,
-  Fuel,
+  AlertTriangle,
+  Clock,
+  ArrowRight,
   Car,
-  DollarSign,
-  Filter
+  FileText
 } from 'lucide-react';
-import StatCard from '../../components/common/StatCard';
-import SearchBar from '../../components/common/SearchBar';
-import FilterDropdown from '../../components/common/FilterDropdown';
-import StatusBadge from '../../components/common/StatusBadge';
 import Pagination from '../../components/common/Pagination';
-import EmptyState from '../../components/common/EmptyState';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import InspectionModal from './InspectionModal';
 import InspectionDetailsModal from './InspectionDetailsModal';
 import AccidentModal from './AccidentModal';
-import { initialInspections, initialAccidents } from '../../data/mockData';
+import InspectionKpis from './components/InspectionKpis';
+import InspectionsFilterBar from './components/InspectionsFilterBar';
+import InspectionsTable from './components/InspectionsTable';
+import AccidentsTable from './components/AccidentsTable';
+import AwaitingInspectionsTable from './components/AwaitingInspectionsTable';
 import { useFleet } from '../../context/FleetContext';
 import { exportToCsv } from '../../utils/exportCsv';
+import { awaitingInspectionVehicles } from '../../data/mockData';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import Can from '../../auth/Can';
 
 export default function InspectionsPage() {
   const { inspections, setInspections, accidents, setAccidents } = useFleet();
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'pickup' | 'return' | 'damaged' | 'accidents'
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'awaiting' | 'pickup' | 'return' | 'damaged' | 'accidents'
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
+
+  // Awaiting inspections list
+  const [awaitingList, setAwaitingList] = useState(awaitingInspectionVehicles);
 
   // Multi-Filter State
   const [typeFilter, setTypeFilter] = useState('All');
@@ -98,66 +96,72 @@ export default function InspectionsPage() {
   const [editingAccident, setEditingAccident] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null); // { type: 'inspection'|'accident', item }
 
+  // Unresolved accidents
+  const unresolvedAccidents = useMemo(() => {
+    return accidents.filter(
+      (a) => a.status !== 'Settled' && (a.resolutionStatus !== 'Settled')
+    );
+  }, [accidents]);
+
   // Stats
   const stats = useMemo(() => {
     const passedCount = inspections.filter((i) => i.status === 'Passed').length;
-    const damageCount = inspections.filter((i) => i.status === 'Damage Detected' || i.status === 'Under Review').length;
-    const openClaims = accidents.filter((a) => a.status !== 'Settled').length;
-    const totalRepairCost = accidents.reduce((sum, a) => sum + (a.repairEstimate || 0), 0);
+    const damageCount = inspections.filter(
+      (i) => i.status === 'Damage Detected' || i.status === 'Under Review'
+    ).length;
+    const openClaims = unresolvedAccidents.length;
+    const totalRepairCost = accidents.reduce((sum, a) => sum + (Number(a.repairEstimate) || 0), 0);
 
     return {
       totalInspections: inspections.length,
       passedCount,
       damageCount,
       openClaims,
-      totalRepairCost
+      totalRepairCost,
+      awaitingCount: awaitingList.length
     };
-  }, [inspections, accidents]);
+  }, [inspections, accidents, unresolvedAccidents, awaitingList]);
 
   // Filtered Inspections
   const filteredInspections = useMemo(() => {
     return inspections.filter((i) => {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
-        i.inspectionNumber.toLowerCase().includes(q) ||
-        i.vehicle.toLowerCase().includes(q) ||
-        i.plate.toLowerCase().includes(q) ||
-        i.driver.toLowerCase().includes(q) ||
-        i.inspector.toLowerCase().includes(q);
+        (i.inspectionNumber || '').toLowerCase().includes(q) ||
+        (i.vehicle || '').toLowerCase().includes(q) ||
+        (i.plate || '').toLowerCase().includes(q) ||
+        (i.driver || '').toLowerCase().includes(q) ||
+        (i.inspector || '').toLowerCase().includes(q);
 
-      // Status Filter matching: All, Passed, Issues Found, Action Required
       let matchesStatus = true;
       if (statusFilter !== 'All') {
         if (statusFilter === 'Passed') {
           matchesStatus = i.status === 'Passed';
-        } else if (statusFilter === 'Issues Found') {
-          matchesStatus = i.status === 'Damage Detected' || i.status === 'Issues Found';
-        } else if (statusFilter === 'Action Required') {
-          matchesStatus = i.status === 'Under Review' || i.status === 'Action Required';
+        } else if (statusFilter === 'Damage Detected') {
+          matchesStatus = i.status === 'Damage Detected';
+        } else if (statusFilter === 'Under Review') {
+          matchesStatus = i.status === 'Under Review';
         } else {
           matchesStatus = i.status === statusFilter;
         }
       }
 
-      // Type Filter matching: All, Pickup (Check-out), Return (Check-in)
       let matchesType = true;
       if (typeFilter !== 'All') {
         if (typeFilter.includes('Pickup')) {
-          matchesType = i.type.toLowerCase().includes('pickup');
+          matchesType = (i.type || '').toLowerCase().includes('pickup');
         } else if (typeFilter.includes('Return')) {
-          matchesType = i.type.toLowerCase().includes('return');
+          matchesType = (i.type || '').toLowerCase().includes('return');
         } else {
           matchesType = i.type === typeFilter;
         }
       }
 
-      // Vehicle Filter matching
       let matchesVehicle = true;
       if (vehicleFilter !== 'All') {
-        matchesVehicle = i.vehicle === vehicleFilter || i.vehicle.toLowerCase().includes(vehicleFilter.toLowerCase());
+        matchesVehicle = i.vehicle === vehicleFilter || (i.vehicle || '').toLowerCase().includes(vehicleFilter.toLowerCase());
       }
 
-      // Date Range matching
       let matchesDate = true;
       if (startDate) {
         matchesDate = matchesDate && i.date >= startDate;
@@ -166,14 +170,13 @@ export default function InspectionsPage() {
         matchesDate = matchesDate && i.date <= endDate;
       }
 
-      // Quick Tab matching
       let matchesTab = true;
       if (activeTab === 'pickup') {
-        matchesTab = i.type.toLowerCase().includes('pickup');
+        matchesTab = (i.type || '').toLowerCase().includes('pickup');
       } else if (activeTab === 'return') {
-        matchesTab = i.type.toLowerCase().includes('return');
+        matchesTab = (i.type || '').toLowerCase().includes('return');
       } else if (activeTab === 'damaged') {
-        matchesTab = i.status === 'Damage Detected' || i.status === 'Under Review' || i.status === 'Issues Found';
+        matchesTab = i.status === 'Damage Detected' || i.status === 'Under Review';
       }
 
       return matchesSearch && matchesStatus && matchesType && matchesVehicle && matchesDate && matchesTab;
@@ -185,15 +188,15 @@ export default function InspectionsPage() {
     return accidents.filter((a) => {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
-        a.id.toLowerCase().includes(q) ||
-        a.vehicle.toLowerCase().includes(q) ||
-        a.plate.toLowerCase().includes(q) ||
-        a.driver.toLowerCase().includes(q) ||
-        a.policeReportNumber.toLowerCase().includes(q) ||
-        a.claimNumber.toLowerCase().includes(q);
+        (a.id || '').toLowerCase().includes(q) ||
+        (a.vehicle || '').toLowerCase().includes(q) ||
+        (a.plate || '').toLowerCase().includes(q) ||
+        (a.driver || '').toLowerCase().includes(q) ||
+        (a.policeReportNumber || '').toLowerCase().includes(q) ||
+        (a.claimNumber || '').toLowerCase().includes(q);
 
-      const matchesStatus = statusFilter === 'All' || a.status === statusFilter;
-      const matchesVehicle = vehicleFilter === 'All' || a.vehicle === vehicleFilter || a.vehicle.toLowerCase().includes(vehicleFilter.toLowerCase());
+      const matchesStatus = statusFilter === 'All' || a.status === statusFilter || a.resolutionStatus === statusFilter;
+      const matchesVehicle = vehicleFilter === 'All' || a.vehicle === vehicleFilter || (a.vehicle || '').toLowerCase().includes(vehicleFilter.toLowerCase());
       let matchesDate = true;
       if (startDate) matchesDate = matchesDate && (a.incidentDate || a.date) >= startDate;
       if (endDate) matchesDate = matchesDate && (a.incidentDate || a.date) <= endDate;
@@ -202,8 +205,26 @@ export default function InspectionsPage() {
     });
   }, [accidents, searchQuery, statusFilter, vehicleFilter, startDate, endDate]);
 
+  // Filtered Awaiting List
+  const filteredAwaiting = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return awaitingList.filter(
+      (item) =>
+        (item.vehicle || '').toLowerCase().includes(q) ||
+        (item.plate || '').toLowerCase().includes(q) ||
+        (item.driver || '').toLowerCase().includes(q) ||
+        (item.contractId || '').toLowerCase().includes(q)
+    );
+  }, [awaitingList, searchQuery]);
+
   // Pagination calculations
-  const currentList = activeTab === 'accidents' ? filteredAccidents : filteredInspections;
+  const currentList =
+    activeTab === 'accidents'
+      ? filteredAccidents
+      : activeTab === 'awaiting'
+      ? filteredAwaiting
+      : filteredInspections;
+
   const totalPages = Math.ceil(currentList.length / pageSize) || 1;
   const paginatedList = currentList.slice(
     (currentPage - 1) * pageSize,
@@ -218,8 +239,43 @@ export default function InspectionsPage() {
       );
     } else {
       setInspections((prev) => [inspectionData, ...prev]);
+      // If was from awaiting list, remove from awaiting
+      setAwaitingList((prev) =>
+        prev.filter((item) => item.plate !== inspectionData.plate && item.vehicle !== inspectionData.vehicle)
+      );
     }
     setEditingInspection(null);
+  };
+
+  const handleStartInspectionFromAwaiting = (awaitingItem) => {
+    setEditingInspection({
+      id: `INS-${Date.now()}`,
+      inspectionNumber: `INSP-${Math.floor(1000 + Math.random() * 9000)}`,
+      type: awaitingItem.type.includes('Return') ? 'Check-in (Return)' : 'Check-out (Pickup)',
+      contractId: awaitingItem.contractId || 'RNT-2025-001',
+      vehicle: awaitingItem.vehicle,
+      plate: awaitingItem.plate,
+      driver: awaitingItem.driver,
+      date: new Date().toISOString().split('T')[0],
+      time: '10:00 AM',
+      odometer: awaitingItem.odometerExpected || 25000,
+      fuelLevel: 100,
+      exteriorCondition: 'Pristine / Clean',
+      interiorCondition: 'Clean & Sanitized',
+      tiresCondition: 'Good (8/32")',
+      windshieldStatus: 'Clear / No Cracks',
+      spareTirePresent: true,
+      damageClassification: 'No Damage',
+      existingDamage: 'No prior damage reported.',
+      newDamage: 'None.',
+      inspector: 'Marcus Brody (Fleet Tech)',
+      status: 'Passed',
+      notes: awaitingItem.reason || '',
+      driverSignature: awaitingItem.driver,
+      driverAcknowledged: true,
+      photos: []
+    });
+    setIsInspectionModalOpen(true);
   };
 
   const handleSaveAccident = (accidentData) => {
@@ -245,9 +301,11 @@ export default function InspectionsPage() {
 
   const handleExport = () => {
     if (activeTab === 'accidents') {
-      exportToCsv(accidents, 'primeroute-accidents-claims.csv');
+      exportToCsv('primeroute-accidents-claims', accidents);
+    } else if (activeTab === 'awaiting') {
+      exportToCsv('primeroute-awaiting-inspections', awaitingList);
     } else {
-      exportToCsv(inspections, 'primeroute-inspections.csv');
+      exportToCsv('primeroute-inspections', inspections);
     }
   };
 
@@ -257,528 +315,207 @@ export default function InspectionsPage() {
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="max-w-2xl">
           <h1 className="text-xl sm:text-2xl font-extrabold text-[#0A1E42] tracking-tight">
-            Inspections &amp; Damage Management
+            Inspections & Damage Management
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Standard check-in/check-out digital inspection checklists, damage photo evidence, and insurance claim tracking
+            Standard check-in/check-out digital inspections, baseline damage comparison, and insurance claim tracking
           </p>
         </div>
 
         <div className="flex flex-col items-start md:items-end gap-2.5 shrink-0 self-start md:self-auto">
-          {/* Top Row: Export Data and Report Accident / Claim */}
           <div className="flex items-center gap-2.5 flex-wrap justify-end">
-            <button
-              onClick={handleExport}
-              className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
-              Export Data
-            </button>
+            <Can module="inspections" do="export">
+              <button
+                onClick={handleExport}
+                className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-500" />
+                Export Data
+              </button>
+            </Can>
 
-            <button
-              onClick={() => {
-                setEditingAccident(null);
-                setIsAccidentModalOpen(true);
-              }}
-              className="px-3.5 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-            >
-              <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
-              + Report Accident / Claim
-            </button>
-          </div>
+            <Can module="inspections" do="add">
+              <button
+                onClick={() => {
+                  setEditingAccident(null);
+                  setIsAccidentModalOpen(true);
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                + Report Accident / Claim
+              </button>
+            </Can>
 
-          {/* Second Row: New Inspection aligned to the right side directly below the top row */}
-          <div className="flex items-center justify-end">
-            <button
-              onClick={() => {
-                setEditingInspection(null);
-                setIsInspectionModalOpen(true);
-              }}
-              className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all active:scale-97 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              New Inspection
-            </button>
+            <Can module="inspections" do="add">
+              <button
+                onClick={() => {
+                  setEditingInspection(null);
+                  setIsInspectionModalOpen(true);
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all active:scale-97 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                New Inspection
+              </button>
+            </Can>
           </div>
         </div>
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={ClipboardCheck}
-          label="Total Inspections"
-          value={stats.totalInspections}
-          change="+4 this week"
-          isPositive={true}
-          color="blue"
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Passed / Pristine"
-          value={stats.passedCount}
-          change="Clean Handover"
-          isPositive={true}
-          color="emerald"
-        />
-        <StatCard
-          icon={AlertTriangle}
-          label="Damages Flagged"
-          value={stats.damageCount}
-          change="Action Required"
-          isPositive={false}
-          color="amber"
-        />
-        <StatCard
-          icon={ShieldAlert}
-          label="Accident Claims Total"
-          value={formatCurrency(stats.totalRepairCost)}
-          change={`${stats.openClaims} open claims`}
-          isPositive={false}
-          color="indigo"
-        />
+      <InspectionKpis stats={stats} />
+
+      {/* Requirement 3: Prominent Flags for Unresolved Accidents & Vehicles Awaiting Inspection */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Flag 1: Vehicles Awaiting Inspection Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200 flex items-start justify-between gap-3 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-extrabold text-[#0A1E42]">
+                  {awaitingList.length} Vehicles Awaiting Handover Inspection
+                </h4>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-amber-500 text-white rounded-full">
+                  Action Required
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                Returned leases & pending checkout units require certified odometer, fuel, and condition sign-off.
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-[11px] font-semibold text-amber-800">
+                <span>• Toyota RAV4 (PR-2024-TR)</span>
+                <span>• Ford F-150 (PR-2024-FF)</span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setActiveTab('awaiting');
+              setCurrentPage(1);
+            }}
+            className="px-3 py-1.5 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-xl border border-amber-300 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            Review Vehicles <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Flag 2: Unresolved Accident Claims Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border border-rose-200 flex items-start justify-between gap-3 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-extrabold text-[#0A1E42]">
+                  {unresolvedAccidents.length} Unresolved Accident Claim Under Review
+                </h4>
+                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-rose-600 text-white rounded-full">
+                  Claim Open
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                CLM-TRV-882204 (Honda Civic EX): $2,800 estimate awaiting adjuster report and driver recovery.
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-[11px] font-semibold text-rose-800">
+                <span>Insurer: Travelers Commercial</span>
+                <span>•</span>
+                <span>Deductible: $1,000</span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setActiveTab('accidents');
+              setStatusFilter('Under Review');
+              setCurrentPage(1);
+            }}
+            className="px-3 py-1.5 text-xs font-bold text-rose-800 bg-rose-100 hover:bg-rose-200 rounded-xl border border-rose-300 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            View Open Claim <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs & Search Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-          {[
-            { id: 'all', label: 'All Inspections' },
-            { id: 'pickup', label: '🚀 Pickup (Check-out)' },
-            { id: 'return', label: '📥 Return (Check-in)' },
-            { id: 'damaged', label: '⚠️ Damage Detected' },
-            { id: 'accidents', label: '🛡️ Accident & Insurance Claims' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setCurrentPage(1);
-              }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <InspectionsFilterBar
+        activeTab={activeTab}
+        onTabChange={(tabId) => {
+          setActiveTab(tabId);
+          setCurrentPage(1);
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={(val) => {
+          setSearchQuery(val);
+          setCurrentPage(1);
+        }}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        filterRef={filterRef}
+        activeFilterCount={activeFilterCount}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        vehicleFilter={vehicleFilter}
+        setVehicleFilter={setVehicleFilter}
+        availableVehicles={availableVehicles}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        onClearFilters={handleClearFilters}
+        awaitingCount={awaitingList.length}
+        unresolvedAccidentsCount={unresolvedAccidents.length}
+      />
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="w-full md:w-72">
-            <SearchBar
-              value={searchQuery}
-              onChange={(val) => {
-                setSearchQuery(val);
-                setCurrentPage(1);
-              }}
-              placeholder={
-                activeTab === 'accidents'
-                  ? 'Search claims, police report, driver...'
-                  : 'Search inspection #, vehicle, plate, driver...'
-              }
-            />
-          </div>
-
-          {/* Inspection Filter Dropdown Popover */}
-          <div className="relative" ref={filterRef}>
-            <button
-              type="button"
-              onClick={() => setIsFilterOpen((prev) => !prev)}
-              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer shadow-sm active:scale-95 ${
-                activeFilterCount > 0 || isFilterOpen
-                  ? 'bg-blue-50 border-[#075EE8] text-[#075EE8] ring-2 ring-[#075EE8]/20'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-              aria-label="Filter inspections"
-              title="Filter inspections"
-            >
-              <Filter className="w-3.5 h-3.5 text-[#075EE8]" />
-              <span>Filter</span>
-              {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#075EE8] text-white text-[10px] font-black flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {/* Filter Dropdown Popover Menu */}
-            {isFilterOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 animate-scale-up space-y-3.5">
-                {/* Popover Header */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-[#075EE8]" />
-                    <h4 className="text-xs font-bold text-[#0A1E42] uppercase tracking-wider">
-                      Inspection Filters
-                    </h4>
-                  </div>
-                  {activeFilterCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleClearFilters}
-                      className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  )}
-                </div>
-
-                {/* Filter 1: Inspection Type */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                    Inspection Type
-                  </label>
-                  <select
-                    value={typeFilter}
-                    onChange={(e) => {
-                      setTypeFilter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
-                  >
-                    <option value="All">All Types</option>
-                    <option value="Pickup (Check-out)">Pickup (Check-out)</option>
-                    <option value="Return (Check-in)">Return (Check-in)</option>
-                  </select>
-                </div>
-
-                {/* Filter 2: Inspection Status */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                    Inspection Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Passed">Passed</option>
-                    <option value="Issues Found">Issues Found</option>
-                    <option value="Action Required">Action Required</option>
-                  </select>
-                </div>
-
-                {/* Filter 3: Vehicle */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                    Vehicle
-                  </label>
-                  <select
-                    value={vehicleFilter}
-                    onChange={(e) => {
-                      setVehicleFilter(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] font-medium focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8] cursor-pointer"
-                  >
-                    {availableVehicles.map((veh) => (
-                      <option key={veh} value={veh}>
-                        {veh === 'All' ? 'All Vehicles' : veh}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Filter 4: Date Range */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-600 block mb-1">
-                    Date Range
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block mb-0.5">Start Date</span>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => {
-                          setStartDate(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8]"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block mb-0.5">End Date</span>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => {
-                          setEndDate(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-[#0A1E42] focus:outline-none focus:ring-2 focus:ring-[#075EE8]/20 focus:border-[#075EE8]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Popover Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={handleClearFilters}
-                    className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
-                  >
-                    Clear Filters
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterOpen(false)}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#075EE8] hover:bg-[#0650C7] rounded-lg transition-all shadow-xs cursor-pointer"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Table */}
-      {activeTab !== 'accidents' ? (
-        // INSPECTIONS TABLE
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] overflow-hidden">
-          {filteredInspections.length === 0 ? (
-            <EmptyState
-              title="No inspection records found"
-              description="No vehicle inspections match your current filter parameters."
-              actionText="Reset All Filters"
-              onAction={() => {
-                setSearchQuery('');
-                handleClearFilters();
-                setActiveTab('all');
-              }}
-            />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Inspection #</th>
-                    <th className="py-3.5 px-4">Type</th>
-                    <th className="py-3.5 px-4">Vehicle &amp; Driver</th>
-                    <th className="py-3.5 px-4">Date &amp; Inspector</th>
-                    <th className="py-3.5 px-4">Odometer</th>
-                    <th className="py-3.5 px-4">Fuel / Battery</th>
-                    <th className="py-3.5 px-4">Condition</th>
-                    <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {paginatedList.map((i) => (
-                    <tr key={i.id} className="hover:bg-blue-50/30 transition-colors group">
-                      <td className="py-3.5 px-4">
-                        <span className="font-mono font-bold text-blue-600 block">
-                          {i.inspectionNumber}
-                        </span>
-                        <span className="text-[10px] text-slate-400">{i.id}</span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
-                            i.type.includes('Pickup')
-                              ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                              : 'bg-indigo-50 text-indigo-700 border border-indigo-100'
-                          }`}
-                        >
-                          {i.type}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <p className="font-bold text-[#0A1E42]">{i.vehicle}</p>
-                        <p className="text-[11px] text-slate-500">
-                          {i.plate} • <span className="text-slate-700 font-semibold">{i.driver}</span>
-                        </p>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <p className="font-semibold text-slate-800">{formatDate(i.date)}</p>
-                        <p className="text-[10px] text-slate-400">By: {i.inspector}</p>
-                      </td>
-
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
-                        {Number(i.odometer).toLocaleString()} mi
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-slate-800 text-[11px]">{i.fuelLevel}%</span>
-                          <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${
-                                i.fuelLevel >= 80 ? 'bg-emerald-500' : i.fuelLevel >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                              }`}
-                              style={{ width: `${i.fuelLevel}%` }}
-                            />
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 max-w-[170px] truncate text-slate-600">
-                        <span className="block font-medium truncate">{i.exteriorCondition}</span>
-                        {i.photos?.length > 0 && (
-                          <span className="text-[10px] text-blue-600 font-bold">
-                            📷 {i.photos.length} photos
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <StatusBadge status={i.status} />
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedInspection(i);
-                              setIsDetailsModalOpen(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View Full Report"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingInspection(i);
-                              setIsInspectionModalOpen(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="Edit Record"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeletingItem({ type: 'inspection', item: i })}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+      {/* Dynamic Content Views */}
+      {activeTab === 'awaiting' ? (
+        <AwaitingInspectionsTable
+          awaitingList={filteredAwaiting}
+          onStartInspection={handleStartInspectionFromAwaiting}
+        />
+      ) : activeTab === 'accidents' ? (
+        <AccidentsTable
+          accidents={filteredAccidents}
+          paginatedList={paginatedList}
+          onResetFilters={() => {
+            setSearchQuery('');
+            handleClearFilters();
+          }}
+          onEditAccident={(a) => {
+            setEditingAccident(a);
+            setIsAccidentModalOpen(true);
+          }}
+          onDeleteAccident={(a) => setDeletingItem({ type: 'accident', item: a })}
+        />
       ) : (
-        // ACCIDENT & CLAIMS TABLE
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] overflow-hidden">
-          {filteredAccidents.length === 0 ? (
-            <EmptyState
-              title="No accident records found"
-              description="No incident or insurance claim records match your parameters."
-              actionText="Reset All Filters"
-              onAction={() => {
-                setSearchQuery('');
-                handleClearFilters();
-              }}
-            />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#F8FAFC] border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Claim # &amp; Date</th>
-                    <th className="py-3.5 px-4">Vehicle &amp; Driver</th>
-                    <th className="py-3.5 px-4">Location / Police #</th>
-                    <th className="py-3.5 px-4">Damage Summary</th>
-                    <th className="py-3.5 px-4">Repair Estimate</th>
-                    <th className="py-3.5 px-4">Insurance &amp; Deductible</th>
-                    <th className="py-3.5 px-4">Driver Recovered</th>
-                    <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {paginatedList.map((a) => (
-                    <tr key={a.id} className="hover:bg-blue-50/30 transition-colors group">
-                      <td className="py-3.5 px-4">
-                        <span className="font-mono font-bold text-amber-600 block">{a.id}</span>
-                        <span className="text-[10px] text-slate-400">{formatDate(a.incidentDate)}</span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <p className="font-bold text-[#0A1E42]">{a.vehicle}</p>
-                        <p className="text-[11px] text-slate-500">{a.plate} • {a.driver}</p>
-                      </td>
-
-                      <td className="py-3.5 px-4 max-w-[180px] truncate">
-                        <p className="font-medium text-slate-700 truncate">{a.location}</p>
-                        <p className="text-[10px] font-mono text-slate-400">{a.policeReportNumber}</p>
-                      </td>
-
-                      <td className="py-3.5 px-4 max-w-[200px] truncate text-slate-600" title={a.damageDescription}>
-                        {a.damageDescription}
-                      </td>
-
-                      <td className="py-3.5 px-4 font-mono font-extrabold text-[#0A1E42]">
-                        {formatCurrency(a.repairEstimate)}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <p className="font-semibold text-slate-800 text-[11px]">{a.insuranceCarrier}</p>
-                        <p className="text-[10px] text-slate-400">
-                          Ded: {formatCurrency(a.deductibleAmount)} • Paid: {formatCurrency(a.insurancePaid)}
-                        </p>
-                      </td>
-
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600">
-                        {formatCurrency(a.driverRecovered)}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <StatusBadge status={a.status} />
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => {
-                              setEditingAccident(a);
-                              setIsAccidentModalOpen(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="Edit Claim"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeletingItem({ type: 'accident', item: a })}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <InspectionsTable
+          inspections={filteredInspections}
+          paginatedList={paginatedList}
+          onResetFilters={() => {
+            setSearchQuery('');
+            handleClearFilters();
+            setActiveTab('all');
+          }}
+          onViewDetails={(i) => {
+            setSelectedInspection(i);
+            setIsDetailsModalOpen(true);
+          }}
+          onEditInspection={(i) => {
+            setEditingInspection(i);
+            setIsInspectionModalOpen(true);
+          }}
+          onDeleteInspection={(i) => setDeletingItem({ type: 'inspection', item: i })}
+        />
       )}
 
       {/* Pagination */}
-      {currentList.length > 0 && (
+      {currentList.length > 0 && activeTab !== 'awaiting' && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -833,4 +570,3 @@ export default function InspectionsPage() {
     </div>
   );
 }
-

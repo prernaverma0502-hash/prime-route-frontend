@@ -2,25 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   RotateCcw,
   CheckCircle2,
-  AlertTriangle,
-  Car,
-  User,
-  Gauge,
-  Fuel,
-  Calendar,
-  Clock,
   ClipboardCheck,
-  FileText,
-  Wrench,
-  ShieldAlert,
-  ArrowRight,
   Printer,
-  Sparkles
+  AlertTriangle
 } from 'lucide-react';
 import Modal from '../../components/common/Modal';
-import { FormInput, FormSelect, FormTextarea } from '../../components/forms/FormInputs';
 import { useFleet } from '../../context/FleetContext';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, formatCurrency } from '../../utils/formatters';
+import ReturnMetricsComparison from './components/ReturnMetricsComparison';
+import ReturnConditionChecklist from './components/ReturnConditionChecklist';
 
 export default function VehicleReturnModal({
   isOpen,
@@ -59,6 +49,7 @@ export default function VehicleReturnModal({
   const todayStr = now.toISOString().split('T')[0];
   const timeStr = now.toTimeString().slice(0, 5);
 
+  const [photos, setPhotos] = useState([]);
   const [formData, setFormData] = useState({
     returnDate: todayStr,
     returnTime: timeStr,
@@ -68,11 +59,13 @@ export default function VehicleReturnModal({
     interiorCondition: 'Clean & Sanitized',
     hasDamage: false,
     damageNotes: '',
+    damageFee: '',
     remarks: 'Vehicle returned in clean operating condition. All keys and transponder accounted for.',
     keysReturned: true,
     vehicleClean: true,
     fuelChecked: true,
-    belongingsRemoved: true
+    belongingsRemoved: true,
+    driverAcknowledged: true
   });
 
   const [errors, setErrors] = useState({});
@@ -80,8 +73,8 @@ export default function VehicleReturnModal({
   // Initialize form data when modal opens
   useEffect(() => {
     if (rental && isOpen) {
+      setPhotos(rental.returnPhotos || []);
       if (isCompleted) {
-        // Load stored return details
         const returnDateVal = rental.returnDateTime ? rental.returnDateTime.split('T')[0] : todayStr;
         const returnTimeVal = rental.returnDateTime ? rental.returnDateTime.split('T')[1]?.slice(0, 5) || '16:00' : '16:00';
         setFormData({
@@ -93,14 +86,15 @@ export default function VehicleReturnModal({
           interiorCondition: rental.returnCondition?.split('/')[1]?.trim() || 'Clean',
           hasDamage: !!rental.hasDamage,
           damageNotes: rental.damageNotes || '',
+          damageFee: String(rental.damageFee || ''),
           remarks: rental.returnRemarks || rental.notes || 'Vehicle returned and settled.',
           keysReturned: true,
           vehicleClean: true,
           fuelChecked: true,
-          belongingsRemoved: true
+          belongingsRemoved: true,
+          driverAcknowledged: true
         });
       } else {
-        // Estimate initial return odometer with a reasonable offset
         setFormData({
           returnDate: todayStr,
           returnTime: timeStr,
@@ -110,11 +104,13 @@ export default function VehicleReturnModal({
           interiorCondition: 'Clean & Sanitized',
           hasDamage: false,
           damageNotes: '',
+          damageFee: '',
           remarks: 'Vehicle returned in clean operating condition. All keys and transponder accounted for.',
           keysReturned: true,
           vehicleClean: true,
           fuelChecked: true,
-          belongingsRemoved: true
+          belongingsRemoved: true,
+          driverAcknowledged: true
         });
       }
       setErrors({});
@@ -123,10 +119,33 @@ export default function VehicleReturnModal({
 
   if (!isOpen || !rental) return null;
 
-  // Calculated distance travelled
   const returnOdoNum = Number(formData.returnOdometer) || 0;
   const distanceTravelled = Math.max(0, returnOdoNum - pickupOdometer);
   const isOdometerInvalid = formData.returnOdometer !== '' && returnOdoNum < pickupOdometer;
+
+  // Calculate settlement breakdown
+  const depositHeld = rental.securityDeposit || rental.deposit || 500;
+  const fuelShortfallFee =
+    formData.returnFuelLevel && !formData.returnFuelLevel.includes('Full') && !formData.returnFuelLevel.includes('100%')
+      ? 45
+      : 0;
+
+  const allowedMiles = (rental.mileageAllowance || 1200) * 2;
+  const excessMiles = Math.max(0, distanceTravelled - allowedMiles);
+  const excessMileageFee = excessMiles * (rental.excessMileageRate || 0.25);
+  const damageDeduction = formData.hasDamage ? Number(formData.damageFee) || 0 : 0;
+  const totalDeductions = fuelShortfallFee + excessMileageFee + damageDeduction;
+  const netRefund = depositHeld - totalDeductions;
+
+  const settlement = {
+    depositHeld,
+    fuelShortfallFee,
+    excessMiles,
+    excessMileageFee,
+    damageDeduction,
+    totalDeductions,
+    netRefund
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -161,7 +180,11 @@ export default function VehicleReturnModal({
     }
 
     if (!formData.keysReturned) {
-      newErrors.keysReturned = 'All vehicle keys must be accounted for before completing return.';
+      newErrors.keysReturned = 'All vehicle keys and transponder must be accounted for before completing return.';
+    }
+
+    if (!formData.driverAcknowledged) {
+      newErrors.driverAcknowledged = 'Driver acknowledgment of return inspection and settlement is required.';
     }
 
     setErrors(newErrors);
@@ -215,7 +238,7 @@ export default function VehicleReturnModal({
         ? `Damage Reported: ${formData.damageNotes}. Remarks: ${formData.remarks}`
         : formData.remarks,
       driverSignature: rental.driver,
-      photos: []
+      photos: photos
     };
     addInspection(newInspectionRecord);
 
@@ -231,8 +254,10 @@ export default function VehicleReturnModal({
       returnStatus: 'Returned & Settled',
       hasDamage: formData.hasDamage,
       damageNotes: formData.damageNotes,
+      damageFee: damageDeduction,
       distanceTravelled: distanceTravelled,
-      // Agreement snapshot preserved
+      returnPhotos: photos,
+      settlementSummary: settlement,
       agreementStatus: rental.agreementStatus || 'Signed',
       agreementData: rental.agreementData,
       driverSignature: rental.driverSignature,
@@ -264,7 +289,7 @@ export default function VehicleReturnModal({
       <form onSubmit={handleConfirmReturn} className="space-y-6">
         {/* Banner Alert */}
         <div
-          className={`p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border shadow-sm ${
+          className={`p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border shadow-xs ${
             isCompleted
               ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
               : 'bg-gradient-to-r from-[#071D49] to-[#0D2D6C] text-white'
@@ -298,7 +323,7 @@ export default function VehicleReturnModal({
               <p className={`text-xs mt-0.5 ${isCompleted ? 'text-slate-600' : 'text-blue-200'}`}>
                 {isCompleted
                   ? `Returned on ${formatDate(rental.returnDateTime || rental.endDate)}. Agreement and deposit settled.`
-                  : 'Record return gauge metrics, inspect vehicle condition, and automatically release vehicle inventory.'}
+                  : 'Record return gauge metrics, inspect vehicle condition, calculate deposit settlement, and automatically release vehicle inventory.'}
               </p>
             </div>
           </div>
@@ -314,343 +339,48 @@ export default function VehicleReturnModal({
           )}
         </div>
 
-        {/* Read-Only Rental & Parties Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs">
-          <div>
-            <span className="text-slate-400 block text-[11px]">Assigned Driver</span>
-            <span className="font-bold text-[#0A1E42] text-sm">{rental.driver}</span>
-            <span className="text-slate-500 block text-[11px]">DL: {driver?.license || 'Verified'}</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block text-[11px]">Fleet Vehicle</span>
-            <span className="font-bold text-[#0A1E42] text-sm">{rental.vehicle}</span>
-            <span className="text-slate-500 block text-[11px]">VIN: {vehicle?.vin || 'On Record'}</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block text-[11px]">Lease Schedule</span>
-            <span className="font-bold text-[#0A1E42] text-sm">
-              {formatDate(rental.startDate)} → {formatDate(rental.endDate)}
-            </span>
-            <span className="text-slate-500 block text-[11px]">Weekly Rate: ${rental.weeklyRent || 450}</span>
-          </div>
-        </div>
+        {/* Section 1: Comparison of Departure vs Return (Odometer & Fuel) */}
+        <ReturnMetricsComparison
+          rental={rental}
+          pickupOdometer={pickupOdometer}
+          pickupFuel={pickupFuel}
+          pickupCondition={pickupCondition}
+          isCompleted={isCompleted}
+          distanceTravelled={distanceTravelled}
+          formData={formData}
+          handleChange={handleChange}
+          errors={errors}
+          isOdometerInvalid={isOdometerInvalid}
+        />
 
-        {/* Section: Side-by-Side Pickup vs. Return Comparison */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="bg-[#F8FAFC] px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#071D49] flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-[#075EE8]" /> Handover vs. Return Comparison
-            </h4>
-            <span className="text-xs font-bold text-[#075EE8] bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-              Total Travelled: {distanceTravelled.toLocaleString()} miles
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-            {/* Left: Pickup Handover Baseline */}
-            <div className="p-4 sm:p-5 space-y-4 bg-slate-50/40">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Departure State (Pickup)
-                </span>
-                <span className="text-[11px] font-mono text-slate-400">
-                  {formatDate(rental.pickupDateTime || rental.startDate)}
-                </span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Departure Odometer</span>
-                  <span className="font-mono font-bold text-[#0A1E42] text-base">
-                    {pickupOdometer.toLocaleString()} mi
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Departure Fuel Level</span>
-                  <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                    <Fuel className="w-3.5 h-3.5 text-emerald-600" /> {pickupFuel}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Departure Condition</span>
-                  <span className="font-medium text-slate-700 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 block mt-0.5">
-                    {pickupCondition}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Return Check-in Metrics */}
-            <div className="p-4 sm:p-5 space-y-4 bg-white">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#075EE8]">
-                  Check-in State (Return)
-                </span>
-                <span className="text-[11px] font-bold text-emerald-600">
-                  {isCompleted ? 'Audit Recorded' : 'Live Check-in'}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {isCompleted ? (
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Return Odometer</span>
-                      <span className="font-mono font-bold text-[#075EE8] text-base">
-                        {Number(formData.returnOdometer).toLocaleString()} mi
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Return Fuel Level</span>
-                      <span className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                        <Fuel className="w-3.5 h-3.5 text-blue-600" /> {formData.returnFuelLevel}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Return Condition</span>
-                      <span className="font-medium text-slate-700 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200 block mt-0.5">
-                        {formData.exteriorCondition} • {formData.interiorCondition}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <FormInput
-                      label="Return Odometer Reading (Miles)"
-                      name="returnOdometer"
-                      type="number"
-                      value={formData.returnOdometer}
-                      onChange={handleChange}
-                      placeholder={`e.g. ${pickupOdometer + 350}`}
-                      required
-                      error={errors.returnOdometer}
-                      helperText={`Must be >= departure reading (${pickupOdometer.toLocaleString()} mi)`}
-                    />
-
-                    {isOdometerInvalid && (
-                      <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-xs text-rose-800 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                        <span>Return odometer cannot be lower than pickup reading ({pickupOdometer} mi).</span>
-                      </div>
-                    )}
-
-                    <FormSelect
-                      label="Return Fuel Level"
-                      name="returnFuelLevel"
-                      value={formData.returnFuelLevel}
-                      onChange={handleChange}
-                      options={[
-                        'Full (100%)',
-                        '7/8 (87%)',
-                        '3/4 (75%)',
-                        '5/8 (62%)',
-                        '1/2 (50%)',
-                        '3/8 (37%)',
-                        '1/4 (25%)',
-                        'Empty (Reserve)'
-                      ]}
-                      required
-                      error={errors.returnFuelLevel}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section: Return Schedule & Condition Assessment */}
-        <div className="bg-slate-50/80 p-4 sm:p-5 rounded-2xl border border-slate-200/80 space-y-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A1E42] flex items-center gap-2">
-            <ClipboardCheck className="w-4 h-4 text-[#075EE8]" /> Return Date, Time &amp; Physical Condition
-          </h4>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <FormInput
-              label="Return Date"
-              name="returnDate"
-              type="date"
-              value={formData.returnDate}
-              onChange={handleChange}
-              disabled={isCompleted}
-              required
-              error={errors.returnDate}
-            />
-
-            <FormInput
-              label="Return Time"
-              name="returnTime"
-              type="time"
-              value={formData.returnTime}
-              onChange={handleChange}
-              disabled={isCompleted}
-              required
-            />
-
-            <FormSelect
-              label="Exterior Condition"
-              name="exteriorCondition"
-              value={formData.exteriorCondition}
-              onChange={handleChange}
-              disabled={isCompleted}
-              options={[
-                'Clean / Pristine (No Dents)',
-                'Minor Road Dust (Normal Wear)',
-                'Surface Scratches Noted',
-                'Body Dent / Damage Present'
-              ]}
-            />
-
-            <FormSelect
-              label="Interior Condition"
-              name="interiorCondition"
-              value={formData.interiorCondition}
-              onChange={handleChange}
-              disabled={isCompleted}
-              options={[
-                'Clean & Sanitized',
-                'Acceptable (Minor Dirt)',
-                'Requires Detailing & Shampoo',
-                'Upholstery Stain / Tear'
-              ]}
-            />
-          </div>
-
-          {/* Damage Observation Toggle */}
-          <div className="pt-2 border-t border-slate-200">
-            <label className="flex items-center gap-2.5 cursor-pointer font-bold text-xs text-[#0A1E42]">
-              <input
-                type="checkbox"
-                name="hasDamage"
-                checked={formData.hasDamage}
-                onChange={handleChange}
-                disabled={isCompleted}
-                className="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500"
-              />
-              <span className="flex items-center gap-1.5 text-rose-700">
-                <ShieldAlert className="w-4 h-4 text-rose-600" />
-                Damage or Maintenance Work Order Required
-              </span>
-            </label>
-
-            {formData.hasDamage && (
-              <div className="mt-3 p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-2 animate-fade-in">
-                <FormTextarea
-                  label="Damage Observations & Repair Notes"
-                  name="damageNotes"
-                  value={formData.damageNotes}
-                  onChange={handleChange}
-                  placeholder="Describe location and severity of scratches, dents, windshield chips, or mechanical alerts..."
-                  disabled={isCompleted}
-                  required={formData.hasDamage}
-                  error={errors.damageNotes}
-                />
-                <p className="text-[11px] text-rose-700 font-semibold flex items-center gap-1">
-                  ⚠️ Note: Marking damage will automatically set the vehicle status to <strong>Maintenance</strong> upon return.
-                </p>
-              </div>
-            )}
-
-            {!formData.hasDamage && (
-              <p className="text-[11px] text-emerald-700 font-medium mt-1">
-                ✓ No damage reported. Vehicle will automatically transition to <strong>Available</strong> for immediate re-dispatch.
-              </p>
-            )}
-          </div>
-
-          <FormTextarea
-            label="Additional Return Remarks & Detailing Notes"
-            name="remarks"
-            value={formData.remarks}
-            onChange={handleChange}
-            disabled={isCompleted}
-            placeholder="Staff check-in observations..."
-          />
-        </div>
-
-        {/* Section: Return Checklist (Check-off before closing) */}
-        {!isCompleted && (
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A1E42]">
-              Mandatory Return Checklist
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  name="keysReturned"
-                  checked={formData.keysReturned}
-                  onChange={handleChange}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span>Vehicle Keys &amp; Transponder Personally Returned</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  name="vehicleClean"
-                  checked={formData.vehicleClean}
-                  onChange={handleChange}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span>Vehicle Cleanliness Inspected</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  name="fuelChecked"
-                  checked={formData.fuelChecked}
-                  onChange={handleChange}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span>Fuel Gauge Verified Against Contract Terms</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  name="belongingsRemoved"
-                  checked={formData.belongingsRemoved}
-                  onChange={handleChange}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span>Driver Personal Belongings Cleared</span>
-              </label>
-            </div>
-            {errors.keysReturned && (
-              <span className="text-xs text-rose-500 font-medium block">{errors.keysReturned}</span>
-            )}
-          </div>
-        )}
+        {/* Section 2: Physical Condition Assessment, Damage, Photos & Settlement */}
+        <ReturnConditionChecklist
+          isCompleted={isCompleted}
+          formData={formData}
+          handleChange={handleChange}
+          errors={errors}
+          rental={rental}
+          photos={photos}
+          setPhotos={setPhotos}
+          settlement={settlement}
+        />
 
         {/* Modal Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 no-print">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 no-print">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+            className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
           >
-            {isCompleted ? 'Close Audit' : 'Cancel'}
+            {isCompleted ? 'Close' : 'Cancel'}
           </button>
 
           {!isCompleted && (
             <button
               type="submit"
-              disabled={isOdometerInvalid}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-md active:scale-95 duration-150 cursor-pointer ${
-                formData.hasDamage
-                  ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
-                  : 'bg-[#075EE8] hover:bg-[#0650C7] shadow-blue-500/25'
-              }`}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#075EE8] hover:bg-[#0650C7] text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all active:scale-95 duration-150 cursor-pointer"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              {formData.hasDamage ? 'Confirm Return (To Maintenance)' : 'Confirm Vehicle Return (To Available)'}
+              <CheckCircle2 className="w-4 h-4" /> Complete Return &amp; Release Inventory
             </button>
           )}
         </div>
@@ -658,4 +388,3 @@ export default function VehicleReturnModal({
     </Modal>
   );
 }
-

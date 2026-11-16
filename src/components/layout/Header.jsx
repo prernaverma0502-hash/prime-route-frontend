@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Bell, Menu, User, ChevronDown, CheckCircle2, Shield, Save } from 'lucide-react';
+import { Bell, Menu, User, ChevronDown, CheckCircle2, Shield, Save, Users, Sparkles } from 'lucide-react';
 import NotificationDropdown from '../common/NotificationDropdown';
 import ProfileDropdown from '../common/ProfileDropdown';
+import RoleSwitcherModal from '../common/RoleSwitcherModal';
+import { useRole } from '../../context/RoleContext';
 import Modal from '../common/Modal';
 
 export default function Header({
@@ -9,6 +11,8 @@ export default function Header({
   onNavigate,
   onLogout
 }) {
+  const { currentRoleId, activeRole } = useRole();
+  const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -83,6 +87,21 @@ export default function Header({
             />
           </div>
 
+          {/* Quick Role Preview Switcher Pill (Visible when VITE_DEMO_MODE is true) */}
+          {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            <button
+              type="button"
+              onClick={() => setShowRoleSwitcher(true)}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all text-xs font-bold hover:shadow-xs cursor-pointer bg-blue-50/80 border-blue-200 text-[#075EE8] hover:bg-blue-100"
+              title="Switch Testing Role Preview"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#075EE8]" />
+              <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Role:</span>
+              <span>{activeRole.name}</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
+          )}
+
           <div className="h-7 w-[1px] bg-slate-200 hidden sm:block" />
 
           {/* Admin User Profile */}
@@ -96,16 +115,17 @@ export default function Header({
             >
               <div className="relative">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
-                  alt="John Doe"
+                  src={activeRole.avatar}
+                  alt={activeRole.fullName}
+                  onError={(e) => { e.currentTarget.src = '/placeholders/avatar-default.svg'; }}
                   className="w-9 h-9 rounded-full object-cover ring-2 ring-[#075EE8]/20 transition-all hover:ring-[#075EE8]/50"
                 />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white animate-pulse" />
               </div>
 
               <div className="hidden sm:block">
-                <p className="text-xs font-bold text-[#0A1E42] leading-tight">John Doe</p>
-                <p className="text-[10px] font-medium text-slate-500">Administrator</p>
+                <p className="text-xs font-bold text-[#0A1E42] leading-tight">{activeRole.fullName}</p>
+                <p className="text-[10px] font-medium text-slate-500">{activeRole.title}</p>
               </div>
 
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block transition-transform duration-200" />
@@ -117,6 +137,7 @@ export default function Header({
               onNavigate={onNavigate}
               onLogout={onLogout}
               onOpenProfile={() => setShowProfileModal(true)}
+              onOpenRoleSwitcher={() => setShowRoleSwitcher(true)}
             />
           </div>
         </div>
@@ -264,6 +285,12 @@ export default function Header({
           </div>
         </form>
       </Modal>
+      {/* Role Testing Preview Switcher Modal */}
+      <RoleSwitcherModal
+        isOpen={showRoleSwitcher}
+        onClose={() => setShowRoleSwitcher(false)}
+        onRoleSwitched={() => onNavigate('dashboard')}
+      />
     </header>
   );
 }

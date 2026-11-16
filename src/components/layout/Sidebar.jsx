@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRole } from '../../context/RoleContext';
 import {
   LayoutDashboard,
   CarFront,
@@ -16,10 +17,13 @@ import {
   ChevronDown,
   Building,
   Shield,
+  ShieldCheck,
   Briefcase,
   Tags,
   FileText,
-  Bell
+  FileCheck,
+  Bell,
+  Layers
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -33,6 +37,7 @@ export default function Sidebar({
   onCloseMobile
 }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(activeMenu === 'settings');
+  const { currentRoleId, isMenuAllowed, paperworkData } = useRole();
 
   useEffect(() => {
     if (activeMenu === 'settings') {
@@ -40,29 +45,42 @@ export default function Sidebar({
     }
   }, [activeMenu]);
 
-  const navItems = [
+  const isEmployeePaperworkEnabled = import.meta.env.VITE_ENABLE_EMPLOYEE_PAPERWORK !== 'false';
+
+  const allNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ...(isEmployeePaperworkEnabled
+      ? [{ id: 'employee-paperwork', label: 'Employee Paperwork', icon: FileCheck }]
+      : []),
     { id: 'vehicles', label: 'Vehicles', icon: CarFront },
     { id: 'drivers', label: 'Drivers', icon: Users },
     { id: 'rentals', label: 'Rentals', icon: KeyRound },
     { id: 'inspections', label: 'Inspections', icon: ClipboardCheck },
+    { id: 'insurance', label: 'Insurance & Compliance', icon: ShieldCheck },
     { id: 'accounting', label: 'Accounting', icon: CircleDollarSign },
+    { id: 'vendors', label: 'Vendors', icon: Briefcase },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'tolls-tickets', label: 'Tolls & Tickets', icon: Receipt },
     { id: 'documents', label: 'Documents', icon: Folders },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
+    { id: 'users', label: 'Users & Roles', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
+
+
+  const navItems = allNavItems.filter((item) => isMenuAllowed(item.id));
+
   const settingsSubItems = [
-    { id: 'general', label: 'Company Profile', icon: Building },
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'roles', label: '7 Role Permissions Matrix', icon: Shield },
-    { id: 'vendors', label: 'Vendors Directory', icon: Briefcase },
-    { id: 'categories', label: 'Categories & Dictionaries', icon: Tags },
-    { id: 'audit', label: 'Immutable Audit Trail', icon: FileText },
-    { id: 'notifications', label: 'Alerts & Notifications', icon: Bell },
+    { id: 'general', label: 'General', icon: Building },
+    { id: 'users', label: 'Users & Roles', icon: Users },
+    { id: 'audit', label: 'Audit Log', icon: FileText },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'integrations', label: 'Integrations', icon: Layers },
+    { id: 'categories', label: 'Statuses & Categories', icon: Tags },
   ];
+
+
 
   const handleMenuClick = (itemId) => {
     if (itemId === 'settings') {

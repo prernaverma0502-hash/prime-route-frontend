@@ -10,7 +10,8 @@ import {
   User,
   CreditCard,
   CheckCircle,
-  Clock
+  Clock,
+  History
 } from 'lucide-react';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -21,6 +22,7 @@ export default function RentalDetailsModal({
   onClose,
   rental,
   onEdit,
+  onAmend,
   onDelete,
   onViewAgreement,
   onProcessReturn,
@@ -185,6 +187,16 @@ export default function RentalDetailsModal({
             Agreement ID: <span className="font-mono font-bold text-[#0A1E42]">{rental.id}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {onAmend && (
+              <button
+                onClick={() => onAmend(rental)}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-purple-800 bg-purple-50 border border-purple-200 hover:bg-purple-100 rounded-xl transition-all cursor-pointer"
+              >
+                <History className="w-4 h-4 text-purple-600" />
+                Extend / Amend
+              </button>
+            )}
+
             {onViewAgreement && (
               <button
                 onClick={() => onViewAgreement(rental)}

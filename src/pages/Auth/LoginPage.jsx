@@ -20,10 +20,11 @@ import {
   Globe
 } from 'lucide-react';
 import Modal from '../../components/common/Modal';
+import { authenticate, findUserByEmail } from '../../api/auth';
+import { ROLES_CONFIG } from '../../auth/permissions';
 
 export default function LoginPage({ onLogin }) {
-  const [selectedRole] = useState('admin');
-  const [email, setEmail] = useState('john.doe@primeroute.io');
+  const [email, setEmail] = useState('marcus.brody@primeroute.io');
   const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -34,12 +35,26 @@ export default function LoginPage({ onLogin }) {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
 
+  const matchedUser = findUserByEmail(email);
+  const currentRoleKey = matchedUser ? matchedUser.role : 'owner';
+  const activeRoleConfig = ROLES_CONFIG[currentRoleKey] || ROLES_CONFIG.owner;
+
   const roleInfo = {
-    id: 'admin',
-    name: 'Administrator',
-    badge: 'Full Access',
-    subtitle: 'Fleet Operations • Global Console',
-    defaultEmail: 'john.doe@primeroute.io',
+    id: currentRoleKey,
+    name: activeRoleConfig?.name || 'Owner / Primary Admin',
+    badge: activeRoleConfig?.badge || 'Full Root Privileges',
+    subtitle: currentRoleKey === 'rental_operations'
+      ? 'Fleet Operations • Dispatch & Operator Console'
+      : currentRoleKey === 'fleet_maintenance'
+      ? 'Maintenance & Shop • Fleet Operations Console'
+      : currentRoleKey === 'finance'
+      ? 'Finance & Accounting • Financial Console'
+      : currentRoleKey === 'secondary_admin'
+      ? 'Operations Management • Admin Console'
+      : currentRoleKey === 'readonly_manager'
+      ? 'Compliance & Audit • View-Only Console'
+      : 'Fleet Operations • Master Console',
+    defaultEmail: matchedUser ? matchedUser.email : 'marcus.brody@primeroute.io',
     icon: Shield,
   };
 
@@ -68,16 +83,25 @@ export default function LoginPage({ onLogin }) {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsLoading(true);
-    // Smooth transition simulation
-    setTimeout(() => {
+    try {
+      const user = await authenticate(email, password);
       setIsLoading(false);
-      if (onLogin) onLogin(selectedRole);
-    }, 650);
+      if (onLogin) onLogin(user.role);
+    } catch (err) {
+      setIsLoading(false);
+      if (err.status === 404) {
+        setEmailError(err.message || 'No corporate account found for this email address.');
+      } else if (err.status === 403) {
+        setEmailError(err.message || 'Account is inactive. Please contact your system administrator.');
+      } else {
+        setPasswordError(err.message || 'Invalid password. Please verify your corporate credentials.');
+      }
+    }
   };
 
 

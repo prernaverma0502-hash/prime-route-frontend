@@ -12,7 +12,9 @@ import {
   Printer,
   ShieldCheck,
   FileSignature,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Camera,
+  Layers
 } from 'lucide-react';
 import StatusBadge from '../../components/common/StatusBadge';
 import { formatDate } from '../../utils/formatters';
@@ -33,7 +35,7 @@ export default function InspectionDetailsModal({
       maxWidth="max-w-3xl"
     >
       <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(85vh-140px)]">
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(85vh-140px)]">
           {/* Header Banner */}
           <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -47,7 +49,7 @@ export default function InspectionDetailsModal({
                     {inspection.plate}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
                   <span>Assigned Driver: <strong>{inspection.driver}</strong></span>
                   <span>•</span>
                   <span>Contract: <strong>{inspection.contractId || 'RNT-2025-001'}</strong></span>
@@ -57,7 +59,7 @@ export default function InspectionDetailsModal({
 
             <div className="flex items-center gap-2 shrink-0">
               <span className={`px-3 py-1 rounded-xl text-xs font-bold ${
-                inspection.type.includes('Pickup')
+                inspection.type?.includes('Pickup')
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-indigo-100 text-indigo-700'
               }`}>
@@ -86,7 +88,7 @@ export default function InspectionDetailsModal({
                 <Fuel className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <p className="text-[11px] font-bold text-slate-400 uppercase">Fuel / Charge Level</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase">Fuel / Battery Level</p>
                 <div className="flex items-center gap-2">
                   <p className="text-base font-extrabold text-[#0A1E42] font-mono">{inspection.fuelLevel}%</p>
                   <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -108,7 +110,7 @@ export default function InspectionDetailsModal({
               <div>
                 <p className="text-[11px] font-bold text-slate-400 uppercase">Emergency Kit</p>
                 <p className="text-xs font-bold text-slate-700">
-                  {inspection.spareTirePresent ? 'Spare Tire & Tools Present' : 'Missing / Incomplete'}
+                  {inspection.spareTirePresent ? 'Spare Tire & Kit Present' : 'Missing / Incomplete'}
                 </p>
               </div>
             </div>
@@ -117,43 +119,77 @@ export default function InspectionDetailsModal({
           {/* Condition Breakdown */}
           <div className="bg-slate-50/70 border border-slate-100 rounded-2xl p-4">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">
-              360° Inspection Evaluation
+              360° Condition Inspection Evaluation
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 bg-white rounded-xl border border-slate-100">
+              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-bold uppercase">Exterior Body</span>
                 <span className="font-extrabold text-slate-800 mt-0.5 block">{inspection.exteriorCondition}</span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-100">
+              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-bold uppercase">Interior Cabin</span>
                 <span className="font-extrabold text-slate-800 mt-0.5 block">{inspection.interiorCondition}</span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-100">
+              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-bold uppercase">Tires &amp; Rims</span>
                 <span className="font-extrabold text-slate-800 mt-0.5 block">{inspection.tiresCondition}</span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-slate-100">
+              <div className="p-3 bg-white rounded-xl border border-slate-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-bold uppercase">Windshield</span>
                 <span className="font-extrabold text-slate-800 mt-0.5 block">{inspection.windshieldStatus}</span>
               </div>
             </div>
           </div>
 
+          {/* Existing vs New Damage Differentiation (Requirement 1) */}
+          <div className="p-4 bg-amber-50/40 border border-amber-200/80 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                Damage Assessment: Existing vs New Damage
+              </h4>
+              <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-lg ${
+                inspection.damageClassification === 'New Damage Incurred'
+                  ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                  : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+              }`}>
+                {inspection.damageClassification || (inspection.status === 'Damage Detected' ? 'New Damage Incurred' : 'Baseline Verified')}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+              <div className="p-3 bg-white rounded-xl border border-amber-100 shadow-2xs">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Pre-Existing / Baseline Damage</p>
+                <p className="text-slate-700 leading-relaxed font-medium">
+                  {inspection.existingDamage || 'None recorded at initial vehicle check-out.'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-white rounded-xl border border-amber-100 shadow-2xs">
+                <p className="text-[10px] font-bold text-rose-500 uppercase mb-1">New Damage Identified at Return</p>
+                <p className="text-slate-800 leading-relaxed font-bold">
+                  {inspection.newDamage || 'None detected. Vehicle returned in approved condition.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Inspector Notes */}
           {inspection.notes && (
-            <div className="p-4 bg-amber-50/50 border border-amber-100 rounded-2xl">
-              <p className="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Inspector Observations &amp; Damage Report
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+              <p className="text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                <ClipboardCheck className="w-3.5 h-3.5 text-blue-600" /> Inspector Observations
               </p>
-              <p className="text-xs text-amber-800 leading-relaxed">{inspection.notes}</p>
+              <p className="text-xs text-slate-600 leading-relaxed">{inspection.notes}</p>
             </div>
           )}
 
           {/* Condition Photos */}
           {inspection.photos && inspection.photos.length > 0 && (
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">
-                Attached Condition Photos ({inspection.photos.length})
+              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-blue-600" />
+                Condition Evidence Photos ({inspection.photos.length})
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {inspection.photos.map((p, idx) => (
@@ -168,20 +204,22 @@ export default function InspectionDetailsModal({
             </div>
           )}
 
-          {/* Signatures */}
+          {/* Signatures & Handover Verification */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
             <div>
               <p className="text-[11px] font-bold text-slate-400 uppercase">Certified Inspector</p>
               <p className="text-xs font-bold text-slate-800 mt-1">{inspection.inspector}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">PrimeRoute Fleet Operations</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">PrimeRoute Fleet Operations • Handover Stamp Verified</p>
             </div>
             <div>
-              <p className="text-[11px] font-bold text-slate-400 uppercase">Driver Acknowledgment</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase">Driver Digital Acknowledgment</p>
               <p className="text-xs font-mono font-bold text-blue-700 mt-1 flex items-center gap-1">
                 <FileSignature className="w-3.5 h-3.5" />
                 {inspection.driverSignature || inspection.driver}
               </p>
-              <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Verified at handover</p>
+              <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">
+                ✓ Condition, Odometer & Fuel Confirmed at Handover
+              </p>
             </div>
           </div>
         </div>
@@ -190,14 +228,14 @@ export default function InspectionDetailsModal({
         <div className="px-6 py-4 bg-[#F8FAFC] border-t border-slate-100 flex items-center justify-between shrink-0">
           <button
             onClick={() => window.print()}
-            className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-sm"
+            className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5 text-slate-500" />
             Print Report
           </button>
           <button
             onClick={onClose}
-            className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all"
+            className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all cursor-pointer"
           >
             Close
           </button>
@@ -206,4 +244,3 @@ export default function InspectionDetailsModal({
     </Modal>
   );
 }
-

@@ -28,6 +28,7 @@ export const getStatusColor = (status) => {
     case 'completed':
     case 'good':
     case 'verified':
+    case 'approved':
       return {
         bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
         dot: 'bg-emerald-500'
@@ -36,6 +37,7 @@ export const getStatusColor = (status) => {
     case 'in progress':
     case 'upcoming':
     case 'pending':
+    case 'pending review':
     case 'processing':
       return {
         bg: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -46,6 +48,7 @@ export const getStatusColor = (status) => {
     case 'expiring soon':
     case 'due soon':
     case 'warning':
+    case 'draft':
       return {
         bg: 'bg-amber-50 text-amber-700 border-amber-200',
         dot: 'bg-amber-500'
@@ -56,6 +59,7 @@ export const getStatusColor = (status) => {
     case 'cancelled':
     case 'expired':
     case 'danger':
+    case 'rejected':
       return {
         bg: 'bg-rose-50 text-rose-700 border-rose-200',
         dot: 'bg-rose-500'

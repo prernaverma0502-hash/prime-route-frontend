@@ -200,6 +200,7 @@ Driver: Digitally Signed (${data.driverName})
     const updatedRental = {
       ...rental,
       agreementStatus: 'Signed',
+      status: rental.status === 'Draft' || rental.status === 'Awaiting Signature' ? 'Active' : rental.status,
       signedAt: nowISO,
       agreementId: baseAgreementData.agreementId,
       driverSignature,
@@ -207,10 +208,14 @@ Driver: Digitally Signed (${data.driverName})
       agreementData: finalizedAgreementData
     };
 
-    // Update shared context
-    setRentals((prev) =>
-      prev.map((r) => (r.id === rental.id ? updatedRental : r))
-    );
+    // Update shared context and API layer
+    if (updateRental) {
+      updateRental(rental.id, updatedRental);
+    } else {
+      setRentals((prev) =>
+        prev.map((r) => (r.id === rental.id ? updatedRental : r))
+      );
+    }
 
     if (onAgreementSigned) {
       onAgreementSigned(updatedRental);

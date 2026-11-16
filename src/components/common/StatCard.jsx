@@ -27,29 +27,32 @@ export default function StatCard({
     return (
       <div
         onClick={onClick}
-        className={`bg-white rounded-2xl p-2.5 sm:p-3 xl:p-4 2xl:p-5 border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] hover:shadow-card-hover hover:-translate-y-1 hover:border-blue-200/60 transition-all duration-300 ease-out flex items-center gap-2 sm:gap-2.5 xl:gap-3.5 group cursor-pointer animate-fade-in ${className}`}
+        className={`bg-white rounded-2xl p-2 sm:p-2.5 xl:p-2.5 2xl:p-3 border border-slate-100 shadow-[0_2px_12px_rgba(7,29,73,0.04)] hover:shadow-card-hover hover:-translate-y-0.5 hover:border-blue-200/60 transition-all duration-200 ease-out flex items-center gap-2 sm:gap-2.5 xl:gap-2 2xl:gap-2.5 group cursor-pointer overflow-hidden animate-fade-in ${className}`}
       >
-        <div className="shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+        <div className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
           {customIcon}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <p className="text-[10.5px] sm:text-[11px] xl:text-xs font-semibold text-slate-500 leading-tight group-hover:text-slate-700 transition-colors whitespace-nowrap">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <p
+            className="text-[10px] sm:text-[10.5px] xl:text-[11px] 2xl:text-xs font-semibold text-slate-500 leading-tight group-hover:text-slate-700 transition-colors truncate"
+            title={title}
+          >
             {title}
           </p>
           <div className="flex items-baseline gap-1 mt-0.5">
-            <h3 className="text-sm sm:text-base xl:text-xl 2xl:text-2xl font-black text-[#0A1E42] tracking-tight leading-tight whitespace-nowrap">
+            <h3 className="text-sm sm:text-base xl:text-lg 2xl:text-xl font-black text-[#0A1E42] tracking-tight leading-tight truncate">
               {prefix}{value}{suffix}
             </h3>
           </div>
           {change && (
             <div
-              className={`flex items-center gap-0.5 font-bold text-[9.5px] sm:text-[10px] xl:text-[11px] mt-0.5 leading-tight ${
+              className={`flex items-center gap-0.5 font-bold text-[9px] sm:text-[9.5px] xl:text-[10px] 2xl:text-[10.5px] mt-0.5 leading-tight truncate ${
                 isRed ? 'text-rose-500' : 'text-emerald-600'
               }`}
             >
-              <span>↑</span>
-              <span>{change.replace(/[↑↓]/g, '').trim()}</span>
+              <span className="shrink-0">↑</span>
+              <span className="truncate">{change.replace(/[↑↓]/g, '').trim()}</span>
             </div>
           )}
         </div>
